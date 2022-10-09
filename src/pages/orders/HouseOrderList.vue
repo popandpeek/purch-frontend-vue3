@@ -1,9 +1,9 @@
 <template>
   <base-card>
     <h1>ORDERS</h1>
-    <div v-if="hasOrders">
-      <house-order-item
-        v-for="order in filteredHouseOrders"
+    <div v-if="orders">
+      <HouseOrderItem
+        v-for="order in orders"
         :id="order.id"
         :key="order.id"
         :date="order.date"
@@ -15,17 +15,20 @@
   </base-card>
 </template>
 
-<script>
+<script setup>
+/**
+ * imports
+ */
 import HouseOrderItem from "../../components/house-orders/HouseOrderItem.vue";
-export default {
-  components: { HouseOrderItem },
-  computed: {
-    filteredHouseOrders() {
-      return this.$store.getters["houseOrders/orders"];
-    },
-    hasOrders() {
-      return this.$store.getters["houseOrders/hasOrders"];
-    },
-  },
-};
+import { useHouseOrderStore } from '../../stores/house-orders'
+import { storeToRefs } from 'pinia';
+
+/**
+ * store
+*/
+const { orders } = storeToRefs(useHouseOrderStore())
+const { fetchOrderItems } = useHouseOrderStore()
+
+fetchOrderItems()
+
 </script>

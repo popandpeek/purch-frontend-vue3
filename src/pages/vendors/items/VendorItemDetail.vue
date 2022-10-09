@@ -14,45 +14,72 @@
   </section>
 </template>
 
-<script>
-export default {
-  props: ["vendorItemId"],
-  data() {
-    return {
-      selectedItem: null,
-    };
-  },
-  computed: {
-    productName() {
-      return this.selectedItem.name;
-    },
-    productPrice() {
-      return this.selectedItem.curPrice;
-    },
-    productDescription() {
-      return this.selectedItem.description;
-    },
-    itemPackSize() {
-      return this.selectedItem.packSize;
-    },
-    itemPackWeight() {
-      return this.selectedItem.packWeight;
-    },
-    itemPackQuantity() {
-      return this.selectedItem.packQuantity;
-    },
-  },
-  created() {
-    this.selectedItem = this.$store.getters["vendorItems/items"].find(
-      (item) => item.id === this.vendorItemId
-    );
-  },
-  methods: {
-    backToItemList() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useVendorItemStore } from '../../../stores/vendor-items'
+
+/**
+ * router
+ */
+const router = useRouter()
+
+/**
+ * store
+ */
+const vendorProductItems = useVendorItemStore()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  vendorItemId: {
+    type: String,
+    default: "",
+  }
+})
+
+/**
+ * computed
+ */
+const selectedItem = computed(() => {
+  return vendorProductItems.items.find( (item) => item.id === props.vendorItemId)
+})
+
+const productName = computed(() => {
+  return selectedItem.value.name
+})
+
+const productPrice = computed(() => {
+  return selectedItem.value.curPrice
+})
+
+const productDescription = computed(() => {
+  return selectedItem.value.description
+})
+
+const itemPackSize = computed(() => {
+  return selectedItem.value.packSize
+})
+
+const itemPackWeight = computed(() => {
+  return selectedItem.value.packWeight
+})
+
+const itemPackQuantity = computed(() => {
+  return selectedItem.value.packQuantity
+})
+
+/**
+ * methods
+ */
+const backToItemList = () => {
+  return router.go(-1)
+}
+
 </script>
 
 <style scoped>

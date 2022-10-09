@@ -13,9 +13,9 @@
           Register Vendor
         </base-button>
       </div>
-      <div v-if="hasVendors">
-        <vendor-contact-item
-          v-for="vendor in filteredVendors"
+      <div v-if="vendors">
+        <VendorContactItem
+          v-for="vendor in vendors"
           :id="vendor.id"
           :key="vendor.id"
           :name="vendor.name"
@@ -30,28 +30,22 @@
   </sections>
 </template>
 
-<script>
+<script setup>
+/**
+ * imports
+ */
 import VendorContactItem from "../../../components/vendors/vendor-contact/VendorContactItem.vue";
+import { storeToRefs } from "pinia";
+import { useVendorStore } from "../../../stores/vendors";
 
-export default {
-  components: {
-    VendorContactItem,
-  },
-  data() {
-    return {};
-  },
-  computed: {
-    filteredVendors() {
-      return this.$store.getters["vendorContacts/vendors"];
-    },
-    hasVendors() {
-      return this.$store.getters["vendorContacts/hasVendors"];
-    },
-  },
-  methods: {
-    
-  },
-};
+/**
+ * store
+ */
+const { vendors } = storeToRefs(useVendorStore())
+const { fetchVendors } = useVendorStore()
+
+fetchVendors()
+
 </script>
 
 <style scoped>

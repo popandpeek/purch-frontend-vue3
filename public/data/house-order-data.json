@@ -1,0 +1,22 @@
+[
+    {
+      "id": "21",
+      "date": "09/21/2021",
+      "submitted": false,
+      "items": [
+        {
+          "id": "crtblk",
+          "quantity": "1",
+          "measure": "case",
+          "price": "19.65"
+        },
+        {
+          "id": "codfrz",
+          "quantity": "20",
+          "measure": "lb",
+          "price": "49.65"
+        }
+      ],
+      "users": [{ "userId": "" }]
+    }
+]

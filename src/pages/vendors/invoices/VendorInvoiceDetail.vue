@@ -30,45 +30,72 @@
   </section>
 </template>
 
-<script>
-export default {
-  props: ["invoiceId"],
-  data() {
-    return {
-      invoiceItem: null,
-    };
-  },
-  computed: {
-    vendorName() {
-      return this.invoiceItem.vendorName;
-    },
-    documentId() {
-      return this.invoiceItem.invoiceDocId;
-    },
-    invoiceDate() {
-      return this.invoiceItem.date;
-    },
-    invoiceStatus() {
-      return this.invoiceItem.status;
-    },
-    invoiceItems() {
-      return this.invoiceItem.items;
-    },
-    hasInvoiceItems() {
-      return this.invoiceItem.items.length > 0;
-    },
-  },
-  created() {
-    this.invoiceItem = this.$store.getters["invoices/invoices"].find(
-      (invoice) => invoice.id === this.invoiceId
-    );
-  },
-  methods: {
-    backwards() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from "vue"
+import { useInvoiceStore } from "../../../stores/vendor-invoices"
+import { useRouter } from 'vue-router'
+
+/** 
+ * store
+ */
+const invoiceStore = useInvoiceStore()
+
+/** 
+ * router
+ */
+const router = useRouter()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  invoiceId: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const invoiceItem = computed(() => {
+  return invoiceStore.invoices.find((invoice) => invoice.id === props.invoiceId)
+})
+
+const vendorName = computed(() => {
+  return invoiceItem.value.vendorName
+})
+
+const documentId = computed(() => {
+  return invoiceItem.value.invoiceDocId
+})
+
+const invoiceDate = computed(() => {
+  return invoiceItem.value.date
+})
+
+const invoiceStatus = computed(() => {
+  return invoiceItem.value.status
+})
+
+const invoiceItems = computed(() => {
+  return invoiceItem.value.items
+})
+
+const hasInvoiceItems = computed(() => {
+  return invoiceItem.value.items.length > 0
+})
+
+/**
+ * methods
+ */
+const backwards = () => {
+  return router.go(-1)
+}
+
 </script>
 
 <style scoped>

@@ -1,7 +1,8 @@
-import { createApp } from "vue";
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
 import router from "./router.js";
-import store from "./store/index.js";
+// import pinia from "./store/index.js";
 import App from "./App.vue";
 import BaseCard from './components/ui/BaseCard.vue';
 import BaseButton from './components/ui/BaseButton.vue';
@@ -12,8 +13,8 @@ import bootstrapCSS from "bootstrap/dist/css/bootstrap.css";
 import bootsrapVue from "bootstrap-vue/dist/bootstrap-vue.css";
 
 const app = createApp(App);
+app.use(createPinia());
 app.use(router);
-app.use(store);
 app.use(bootstrapCSS);
 app.use(bootsrapVue);
 

@@ -28,7 +28,7 @@
           :type="invItem"
           :title="invItem"
         >
-          {{ invItem.houseItemId }} --- {{ invItem.quantity
+          {{ invItem.houseItem }} --- {{ invItem.quantity
           }}{{ invItem.measure }}
         </li>
       </div>
@@ -36,36 +36,60 @@
   </section>
 </template>
 
-<script>
-export default {
-  props: ["inventoryId"],
-  data() {
-    return {
-      selectedItem: null,
-    };
-  },
-  computed: {
-    inventoryDate() {
-      return this.selectedItem.date;
-    },
-    inventorySubmitted() {
-      return this.selectedItem.submitted;
-    },
-    inventory() {
-      return this.selectedItem.items;
-    },
-  },
-  created() {
-    this.selectedItem = this.$store.getters["inventories/inventories"].find(
-      (item) => item.id === this.inventoryId
-    );
-  },
-  methods: {
-    backToInventories() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import { computed, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
+import { useInventoriesStore } from '../../stores/inventories';
+
+/**
+ * router
+ */
+const router = useRouter()
+
+/**
+ * store
+ */
+const inventoryItems = useInventoriesStore()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  inventoryId: {
+    type: String,
+    required: true, 
+  }
+})
+
+/**
+ * computed
+ */
+const inventoryItem = computed(() => {
+   return inventoryItems.inventories.find((item) => item.id === props.inventoryId)
+})
+
+const inventoryDate = computed(() => {
+  return inventoryItem.value.date
+})
+
+const inventorySubmitted = computed(() => {
+  return inventoryItem.value.submitted
+})
+
+const inventory = computed(() => {
+  return inventoryItem.value.items
+})
+
+/**
+ * methods
+ */
+const backToInventories = () => {
+      return router.go(-1);
+}
+
 </script>
 
 <style scoped>

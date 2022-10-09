@@ -1,7 +1,7 @@
 <template>
   <base-input-list-item>
-    <h3>{{ productName }}</h3>
-    <h4>{{ productMeasure }} --- ${{ productPrice }}</h4>
+    <h3>{{ props.name }}</h3>
+    <h4>{{ productMeasure }} --- ${{ props.price }}</h4>
     <div class="actions">
       <base-button
         link
@@ -13,24 +13,49 @@
   </base-input-list-item>
 </template>
 
-<script>
-export default {
-  props: ["id", "name", "packWeight", "packQuantity", "price"],
-  computed: {
-    productName() {
-      return this.name;
-    },
-    productMeasure() {
-        return this.packQuantity + this.packWeight;
-    },
-    productPrice() {
-      return this.price;
-    },
-    viewDetails() {
-        return '/vendors/items/' + this.id;
-    }
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from 'vue';
+
+/**
+ * props
+ */
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true
   },
-};
+  name: {
+    type: String,
+    required: true
+  },
+  packWeight: {
+    type: String,
+    required: true
+  },
+  packQuantity: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: String,
+    required: true
+  },
+})
+
+/**
+ * computed
+ */
+const productMeasure = computed(() => {
+  return props.packQuantity + ' / ' + props.vendorItem.packWeight
+})
+
+const viewDetails = computed(() => {
+  return '/vendor/items/' + props.id
+})
+
 </script>
 
 <style scoped>

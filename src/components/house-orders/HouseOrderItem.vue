@@ -12,18 +12,43 @@
   </base-input-list-item>
 </template>
 
-<script>
-export default {
-    props: ["id", "date"],
-    computed: {
-        orderDate() {
-            return this.date;
-        },
-        viewOrderDetails() {
-            return this.$route.path + '/' + this.id;
-        }
-    }
-}
+<script setup>
+/*
+  imports
+*/
+import { computed, defineProps } from 'vue'
+import { useRoute } from 'vue-router';
+
+/*
+  props
+*/
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true, 
+  },
+  date: {
+    type: String,
+    required: true
+  }
+})
+
+/*
+  route
+*/
+const route = useRoute()
+
+/*
+  computed
+*/
+const orderDate = computed(() => {
+  return props.date
+})
+
+const viewOrderDetails = computed(() => {
+  return route.path + '/' + props.id
+})
+
 </script>
 
 <style scoped>

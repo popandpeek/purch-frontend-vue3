@@ -1,9 +1,9 @@
 <template>
   <base-card>
     <h1>INVENTORIES</h1>
-    <div v-if="hasInventories">
-      <inventory-item
-        v-for="inventory in filteredInventories"
+    <div v-if="inventories">
+      <InventoryItem
+        v-for="inventory in inventories"
         :id="inventory.id"
         :key="inventory.id"
         :date="inventory.date"
@@ -15,18 +15,20 @@
   </base-card>
 </template>
 
-<script>
+<script setup>
+/**
+ * imports
+ */
 import InventoryItem from "../../components/inventories/InventoryItem.vue";
+import { useInventoriesStore } from '../../stores/inventories'
+import { storeToRefs } from "pinia";
 
-export default {
-  components: { InventoryItem },
-  computed: {
-    filteredInventories() {
-      return this.$store.getters["inventories/inventories"];
-    },
-    hasInventories() {
-      return this.$store.getters["inventories/hasInventories"];
-    },
-  },
-};
+/**
+ * store  
+*/
+const { inventories } = storeToRefs(useInventoriesStore())
+const { fetchInventories } = useInventoriesStore()
+
+fetchInventories()
+
 </script>

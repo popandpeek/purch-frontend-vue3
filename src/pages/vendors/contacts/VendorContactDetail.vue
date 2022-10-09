@@ -10,30 +10,49 @@
   <router-view />
 </template>
 
-<script>
-export default {
-  props: ["vendorId"],
-  data() {
-    return {
-      vendorItem: null,
-    };
-  },
-  computed: {
-    vendorName() {
-      return this.vendorItem.name;
-    },
-  },
-  created() {
-    this.vendorItem = this.$store.getters["vendorContacts/vendors"].find(
-      (vendor) => vendor.id === this.vendorId
-    );
-  },
-  methods: {
-    backToVendors() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from 'vue';
+import { useVendorStore } from '../../../stores/vendors';
+import { useRouter } from 'vue-router';
+
+/**
+ * router
+ */
+const router = useRouter()
+
+/**
+ * store
+ */
+const vendors = useVendorStore()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const vendorItem = computed(() => {
+  return vendors.vendors.find((vendor) => vendor.id === props.id)
+})
+
+const vendorName = computed(() => {
+  return vendorItem.value.name
+})
+
+const backToVendors = computed(() => {
+  return router.go(-1)
+})
+
 </script>
 
 <style scoped>

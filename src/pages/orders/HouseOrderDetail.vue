@@ -19,7 +19,7 @@
   <base-card>
     <div v-if="hasItem">
       <li>
-        <house-order-list-item
+        <HouseOrderListItem
           v-for="item in itemList"
           :id="item.id"
           :key="item.id"
@@ -39,51 +39,68 @@
   </base-card>
 </template>
 
-<script>
-import HouseOrderListItem from "../../components/house-orders/HouseOrderListItem.vue";
-export default {
-  components: { HouseOrderListItem },
-  props: ["houseOrderId"],
-  data() {
-    return {
-      selectedItem: null,
-      orderItemList: null,
-    };
-  },
-  computed: {
-    orderDate() {
-      return this.selectedItem.date;
-    },
-    orderSubmitted() {
-      return this.selectedItem.submitted;
-    },
-    itemList() {
-      return this.orderItemList;
-    },
-    getOrderId() {
-      return this.houseOrderId;
-    }
-  },
-  created() {
-    this.selectedItem = this.$store.getters["houseOrders/orders"].find(
-      (order) => order.id === this.houseOrderId
-    );
-    if (this.selectedItem) {
-      this.orderItemList = this.selectedItem["items"];
-    }
-  },
-  methods: {
-    hasItem() {
-      if (this.selectedItem) {
-        return true;
-      }
-      return false;
-    },
-    backToOrders() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import HouseOrderListItem from "../../components/house-orders/HouseOrderListItem.vue"
+import { computed, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
+import { useHouseOrderStore } from '../../stores/house-orders'
+
+/**
+ * store
+ */
+const houseOrderStore = useHouseOrderStore()
+
+/**
+ * router
+ */
+const router = useRouter()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  houseOrderId: {
+    type: String,
+    required: true, 
+  }
+})
+
+/**
+ * computed
+ */
+const orderDate = computed(() => {
+  return selectedItem.value.date
+})
+
+const orderSubmitted = computed(() => {
+  return selectedItem.value.submitted
+})
+
+const selectedItem = computed(() => {
+  return houseOrderStore.orders.find( (order) => order.id === props.houseOrderId);
+})
+
+const hasItem = computed(() => {
+  if (selectedItem.value) {
+    return true;
+  }
+  return false;
+})
+
+const itemList = computed(() => {
+  return selectedItem.value['items'];
+})
+
+/**
+ * methods
+ */
+const backToOrders = () => {
+      return router.go(-1);
+}
+
 </script>
 
 <style scoped>

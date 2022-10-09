@@ -2,8 +2,8 @@
   <base-card>
     <h1>PRODUCTS</h1>
     <div v-if="hasItems">
-      <vendor-product-item
-        v-for="item in filteredItems"
+      <VendorProductItem
+        v-for="item in vendorProductItems"
         :id="item.id"
         :key="item.id"
         :name="item.name"
@@ -18,30 +18,44 @@
   </base-card>
 </template>
 
-<script>
+<script setup>
+/**
+ * imports
+ */
 import VendorProductItem from "../../../components/vendors/vendor-products/VendorProductItem.vue";
-export default {
-  components: { VendorProductItem },
-  props: ["vendorId"],
-  data() {
-    return {
-      vendorItems: null
-    }
-  },
-  computed: {
-    filteredItems() {
-      return this.vendorItems;
-    },
-    hasItems() {
-      return this.vendorItems.length > 0;
-    },
-  },
-  created() {
-    this.vendorItems = this.$store.getters["vendorItems/items"].filter(
-        (item) => item.vendorId === this.vendorId
-      );
-  },
-};
+import { useVendorItemStore } from '../../../stores/vendor-items'
+import { defineProps, computed } from "vue";
+import { storeToRefs } from "pinia";
+
+/**
+ * store
+ */
+const { vendorItems } = storeToRefs(useVendorItemStore())
+const { fetchVendorItems } = useVendorItemStore()
+
+fetchVendorItems()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  vendorId: {
+    type: String,
+    required: true
+  }
+}) 
+
+/**
+ * computed
+ */
+const vendorProductItems = computed(() => {
+  return vendorItems.filter((item) => item.vendorId === props.vendorId)
+})
+
+const hasItems = computed(() => {
+  return vendorProductItems.value.length > 0
+})
+
 </script>
 
 <style scoped>

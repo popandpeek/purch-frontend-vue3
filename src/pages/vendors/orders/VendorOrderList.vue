@@ -2,7 +2,7 @@
   <base-card>
     <h1>ORDERS</h1>
     <div v-if="hasOrders">
-      <vendor-order-item
+      <VendorOrderItem
         v-for="order in filteredOrders"
         :id="order.id"
         :key="order.id"
@@ -15,28 +15,47 @@
   </base-card>
 </template>
 
-<script>
+<script setup>
+/**
+ * imports
+ */
 import VendorOrderItem from "../../../components/vendors/vendor-orders/VendorOrderItem.vue";
-export default {
-  components: { VendorOrderItem },
-  props: ["vendorId"],
-  data() {
-    return { vendorOrders: null };
+import { useVendorOrderStore } from '../../../stores/vendor-orders'
+import { defineProps, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+// import { useRoute } from 'vue-router'
+
+/**
+ * store
+ */
+const { vendorOrders } = storeToRefs(useVendorOrderStore())
+const { fetchVendorOrders } = useVendorOrderStore()
+
+fetchVendorOrders()
+
+/**
+ * route
+ */
+// const route = useRoute()
+
+/**
+ * props
+ */
+const props = defineProps({
+  vendorId: {
+    type: String,
+    required: true
   },
-  computed: {
-    filteredOrders() {
-      return this.vendorOrders;
-    },
-    hasOrders() {
-      return this.vendorOrders && this.vendorOrders.length > 0;
-    },
-  },
-  created() {
-    this.vendorOrders = this.$store.getters["vendorOrders/orders"].filter(
-      (order) => order.vendorId === this.vendorId
-    );
-  },
-};
+})
+
+const filteredOrders = computed(() => {
+  return vendorOrders.filter((order) => order.vendorId === props.vendorId)
+})
+
+const hasOrders = computed(() => {
+  return filteredOrders.value && filteredOrders.value.length > 0
+})
+
 </script>
 
 <style scoped>

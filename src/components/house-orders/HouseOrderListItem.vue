@@ -1,55 +1,68 @@
 <template>
   <div>
     <base-input-list-item>
-      <p>{{ itemName }}</p>
-      <p>${{ itemPrice }}</p>
-      <p>{{ itemMeasure }}</p>
-      <input
-        v-model="amount"
-        type="number"
-      >
+      <p>{{ props.id }}</p>
+      <p>${{ props.price }}</p>
+      <p>{{ props.measure }}</p>
+      <input v-model="amount" type="number" />
     </base-input-list-item>
   </div>
 </template>
 
-<script>
-export default {
-  props: ["id", "quantity", "measure", "price", 'orderId'],
-  data() {
-    return {
-      amount: this.quantity,
-      itemId: this.id,
-      houseOrderId: this.orderId,
-    };
+<script setup>
+/**
+ * imports
+ */
+import { computed, defineProps } from 'vue'
+import { useHouseOrderStore } from '../../stores/house-orders'
+
+/*
+  store
+*/
+const orderStore = useHouseOrderStore()
+
+/*
+  props
+*/
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true
   },
-  computed: {
-    getOrderId() {
-      return this.houseOrderId;
-    },
-    itemName() {
-      return this.id;
-    },
-    itemPrice() {
-      return this.price;
-    },
-    itemMeasure() {
-      return this.measure;
-    },
+  quantity: {
+    type: String,
+    required: true
   },
-  watch: {
-    amount(val) {
-      this.$store.dispatch(
-        "houseOrders/getQuantity", { 
-        houseOrderId: this.getOrderId,
-        itemId: this.id,
-        updatedQuantity: val,
-      });
-    },
+  measure: {
+    type: String,
+    required: true
   },
-  methods: {
-    
-  }
-};
+  price: {
+    type: String,
+    required: true
+  },
+  orderId: {
+    type: String,
+    required: true
+  },
+})
+
+/*
+  computed
+*/
+const amount = computed({
+  get() {
+    return props.quantity
+  },
+  set(newValue) {
+    orderStore.setQuantity({
+      houseOrderId: props.orderId,
+      itemId: props.id,
+      updatedQuantity: newValue,
+    })
+  },
+})
+
 </script>
 
 <style scoped>

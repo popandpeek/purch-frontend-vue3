@@ -29,39 +29,62 @@
   </section>
 </template>
 
-<script>
-export default {
-  props: ["houseItemId"],
-  data() {
-    return {
-      selectedItem: null,
-    };
-  },
-  computed: {
-    productName() {
-      return this.selectedItem.name;
-    },
-    productPrice() {
-      return this.selectedItem.lastPrice;
-    },
-    productDescription() {
-      return this.selectedItem.description;
-    },
-    vendors() {
-      return this.selectedItem.vendorList;
-    },
-  },
-  created() {
-    this.selectedItem = this.$store.getters["houseItems/items"].find(
-      (item) => item.id === this.houseItemId
-    );
-  },
-  methods: {
-    backToOrders() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+
+import { computed, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
+import { useHouseItemsStore } from '../../stores/house-items';
+
+/**
+ * store
+ */
+const itemsStore = useHouseItemsStore()
+
+/*
+  route
+*/
+const router = useRouter()
+
+/*
+  props
+*/
+const props = defineProps ({
+  houseItemId: {
+    type: String,
+    required: true, 
+  }
+})
+
+/*
+  computed
+*/
+const selectedItem = computed(() => {
+  return itemsStore.items.find( (item) => item.id === props.houseItemId)
+})
+
+const productName = computed(() => {
+  return selectedItem.value.name
+})
+
+const productPrice = computed(() => {
+  return selectedItem.value.lastPrice
+})
+
+const productDescription = computed(() => {
+  return selectedItem.value.productDescription
+})
+
+const vendors = computed(() => {
+  return selectedItem.value.vendorList
+})
+
+/*
+  route function
+*/
+const backToOrders = () => {
+  return router.go(-1)
+}
+
 </script>
 
 <style scoped>

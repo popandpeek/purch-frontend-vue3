@@ -1,8 +1,8 @@
 <template>
   <li>
-    <h2>{{ vendorName }}</h2>
-    <h5>{{ vendorEmail }}</h5>
-    <h5>{{ vendorPhone }}</h5>
+    <h2>{{ props.name }}</h2>
+    <h5>{{ props.email }}</h5>
+    <h5>{{ props.phone }}</h5>
     <div class="actions">
       <base-button
         link
@@ -26,30 +26,55 @@
   </li>
 </template>
 
-<script>
-export default {
-  props: ["id", "name", "email", "phone"],
-  computed: {
-    vendorName() {
-      return this.name;
-    },
-    vendorEmail() {
-      return this.email;
-    },
-    vendorPhone() {
-      return this.phone;
-    },
-    vendorInvoices() {
-      return this.$route.path + "/" + this.id + "/invoices/";
-    },
-    vendorItems() {
-      return this.$route.path + "/" + this.id + "/items/";
-    },
-    vendorOrders() {
-      return this.$route.path + "/" + this.id + "/orders/";
-    },
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+/**
+ * route
+ */
+const route = useRoute()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true
   },
-};
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  phone: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const vendorInvoices = computed(() => {
+  return route.path + '/' + props.id + '/invoices/'
+})
+
+const vendorItems = computed(() => {
+  return route.path + '/' + props.id + '/items/'
+})
+
+const vendorOrders = computed(() => {
+  return route.path + '/' + props.id + '/orders/'
+})
+
 </script>
 
 <style scoped>

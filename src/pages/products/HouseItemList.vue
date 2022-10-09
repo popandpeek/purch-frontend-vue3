@@ -1,9 +1,9 @@
 <template>
   <base-card>
     <h1>PRODUCTS</h1>
-    <div v-if="hasItems">
+    <div v-if="items">
       <house-product-item
-        v-for="item in filteredHouseItems"
+        v-for="item in items"
         :id="item.id"
         :key="item.id"
         :name="item.name"
@@ -13,23 +13,22 @@
       />
     </div>
     <h3 v-else>
-      No house order found!
+      No items found!
     </h3>
   </base-card>
 </template>
 
-<script>
-import HouseProductItem from "../../components/house-products/HouseProductItem.vue";
+<script setup>
+import HouseProductItem from '../../components/house-products/HouseProductItem.vue'
+import { useHouseItemsStore } from '../../stores/house-items'
+import { storeToRefs } from 'pinia';
 
-export default {
-  components: { HouseProductItem },
-  computed: {
-    filteredHouseItems() {
-      return this.$store.getters["houseItems/items"];
-    },
-    hasItems() {
-      return this.$store.getters["houseItems/hasItems"];
-    },
-  },
-};
+/*
+  store
+*/
+const { items } = storeToRefs(useHouseItemsStore())
+const { fetchHouseItems } = useHouseItemsStore()
+
+fetchHouseItems()
+
 </script>

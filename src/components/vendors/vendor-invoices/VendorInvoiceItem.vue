@@ -1,7 +1,7 @@
 <template>
   <base-input-list-item>
-    <h3>date: {{ invoiceDate }}</h3>
-    <h5>invoice #: {{ documentId }}</h5>
+    <h3>date: {{ props.date }}</h3>
+    <h5>invoice #: {{ props.docId }}</h5>
     <div class="actions">
       <base-button
         link
@@ -13,21 +13,41 @@
   </base-input-list-item>
 </template>
 
-<script>
-export default {
-  props: [ "id", "date", "docId", "status"],
-  computed: {
-    documentId() {
-      return this.docId;
-    },
-    invoiceDate() {
-        return this.date;
-    },
-    invoiceDetails() {
-      return "/vendors/invoices/" + this.id;
-    },
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from "vue"
+
+/**
+ * props
+ */
+const props = defineProps ({
+  id: {
+    type: String,
+    required: true
   },
-};
+  date: {
+    type: String,
+    required: true
+  },
+  docId: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const invoiceDetails = computed(() => {
+  return '/vendors/invoices' + props.id
+})
+
 </script>
 
 <style scoped>

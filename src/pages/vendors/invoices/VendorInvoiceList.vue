@@ -28,25 +28,48 @@
   </base-card>
 </template>
 
-<script>
+<script setup>
+/** 
+ * imports
+ */
 import VendorInvoiceItem from "../../../components/vendors/vendor-invoices/VendorInvoiceItem.vue";
-export default {
-  components: { VendorInvoiceItem },
-  props: ["vendorId"],
-  computed: {
-    filteredInvoices() {
-      return this.$store.getters["invoices/invoices"].filter(
-        (item) => item.vendorId === this.vendorId
-      );
-    },
-    hasInvoices() {
-      return this.filteredInvoices.length > 0;
-    },
-    invoiceRegistration() {
-      return "/vendors/invoiceRegistration";
-    },
-  },
-};
+import { defineProps, computed } from "vue";
+import { useInvoiceStore } from '../../../stores/vendor-invoices'
+import { storeToRefs } from 'pinia'
+
+/**
+ * store
+ */
+const { invoices } = storeToRefs(useInvoiceStore())
+const { fetchVendorInvoices } = useInvoiceStore()
+
+fetchVendorInvoices()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  vendorId: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const filteredInvoices = computed(() => {
+  return invoices.filter((item) => item.vendorId === props.vendorId)
+})
+
+const hasInvoices = computed(() => {
+  return invoices.value.length > 0
+})
+
+const invoiceRegistration = computed(() => {
+  return '/vendors/invoiceRegistration'
+})
+
 </script>
 
 <style scoped>

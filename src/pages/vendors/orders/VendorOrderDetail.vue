@@ -29,39 +29,64 @@
   </section>
 </template>
 
-<script>
-export default {
-  props: ["vendorOrderId"],
-  data() {
-    return {
-      orderItem: null,
-    };
-  },
-  computed: {
-    vendorName() {
-      return this.orderItem.vendorName;
-    },
-    orderDate() {
-      return this.orderItem.date;
-    },
-    orderItems() {
-      return this.orderItem.items;
-    },
-    hasOrderItems() {
-      return this.orderItem && this.orderItem.items.length > 0;
-    },
-  },
-  created() {
-    this.orderItem = this.$store.getters["vendorOrders/orders"].find(
-      (order) => (order.id = this.vendorOrderId)
-    );
-  },
-  methods: {
-    backToOrderList() {
-      return this.$router.go(-1);
-    },
-  },
-};
+<script setup>
+/**
+ * imports
+ */
+import { defineProps, computed } from "vue"
+import { useVendorOrderStore } from "../../../stores/vendor-orders"
+import { useRouter } from "vue-router"
+
+/**
+ * store
+ */
+const vendorOrders = useVendorOrderStore()
+
+/**
+ * router
+ */
+const router = useRouter()
+
+/**
+ * props
+ */
+const props = defineProps ({
+  vendorOrderId: {
+    type: String,
+    required: true
+  }
+})
+
+/**
+ * computed
+ */
+const vendorOrderItems = computed(() => {
+  return vendorOrders.orders.find((order) => (order.id === props.vendorOrderId))
+})
+
+const vendorName = computed(() => {
+  return vendorOrderItems.value.vendorName
+})
+
+const orderDate = computed(() => {
+  return vendorOrderItems.value.date
+})
+
+const orderItems = computed(() => {
+  return vendorOrderItems.value.items
+})
+
+const hasOrderItems = computed(() => {
+  return vendorOrderItems.value && vendorOrderItems.value.items.length > 0
+})
+
+/**
+ * methods
+ */
+const backToOrderList = () => {
+  return router.go(-1)
+}
+
 </script>
 
 <style scoped>
