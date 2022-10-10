@@ -5,7 +5,7 @@
     <div class="actions">
       <base-button
         link
-        :to="viewDetails"
+        :to="'/vendors/items/' + props.id"
       >
         View Details
       </base-button>
@@ -49,11 +49,7 @@ const props = defineProps ({
  * computed
  */
 const productMeasure = computed(() => {
-  return props.packQuantity + ' / ' + props.vendorItem.packWeight
-})
-
-const viewDetails = computed(() => {
-  return '/vendor/items/' + props.id
+  return props.packQuantity + ' / ' + props.packWeight
 })
 
 </script>

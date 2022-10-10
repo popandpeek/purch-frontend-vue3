@@ -5,7 +5,7 @@
     <div class="actions">
       <base-button
         link
-        :to="invoiceDetails"
+        :to="'/vendors/invoices/' + props.id"
       >
         View Details
       </base-button>
@@ -17,7 +17,7 @@
 /**
  * imports
  */
-import { defineProps, computed } from "vue"
+import { defineProps } from "vue"
 
 /**
  * props
@@ -39,13 +39,6 @@ const props = defineProps ({
     type: String,
     required: true
   }
-})
-
-/**
- * computed
- */
-const invoiceDetails = computed(() => {
-  return '/vendors/invoices' + props.id
 })
 
 </script>

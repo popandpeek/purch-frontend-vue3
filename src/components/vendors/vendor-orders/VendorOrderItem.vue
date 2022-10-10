@@ -1,10 +1,10 @@
 <template>
   <base-input-list-item>
-    <h3>{{ props.date }}</h3>
+    <h3>date: {{ props.date }}</h3>
     <div class="actions">
       <base-button
         link
-        :to="viewDetails"
+        :to="'/vendors/orders/' + props.id"
       >
         View Details
       </base-button>
@@ -16,7 +16,7 @@
 /**
  * imports
  */
-import { computed, defineProps } from 'vue'
+import { defineProps } from 'vue'
 
 /**
  * props
@@ -30,13 +30,6 @@ const props = defineProps ({
     type: String,
     required: true
   }
-})
-
-/**
- * computed
- */
-const viewDetails = computed(() => {
-  return 'vendors/orders/' + props.id
 })
 
 </script>

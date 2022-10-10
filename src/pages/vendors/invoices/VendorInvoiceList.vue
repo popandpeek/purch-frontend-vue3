@@ -12,9 +12,9 @@
         Add Invoice
       </base-button>
     </div>
-    <div v-if="hasInvoices">
-      <vendor-invoice-item
-        v-for="invoice in filteredInvoices"
+    <div v-if="invoices">
+      <VendorInvoiceItem
+        v-for="invoice in invoices"
         :id="invoice.id"
         :key="invoice.id"
         :doc-id="invoice.invoiceDocId"
@@ -41,9 +41,9 @@ import { storeToRefs } from 'pinia'
  * store
  */
 const { invoices } = storeToRefs(useInvoiceStore())
-const { fetchVendorInvoices } = useInvoiceStore()
+const { fetchVendorInvoicesPerVendor } = useInvoiceStore()
 
-fetchVendorInvoices()
+fetchVendorInvoicesPerVendor(props.vendorId)
 
 /**
  * props
@@ -53,17 +53,6 @@ const props = defineProps ({
     type: String,
     required: true
   }
-})
-
-/**
- * computed
- */
-const filteredInvoices = computed(() => {
-  return invoices.filter((item) => item.vendorId === props.vendorId)
-})
-
-const hasInvoices = computed(() => {
-  return invoices.value.length > 0
 })
 
 const invoiceRegistration = computed(() => {

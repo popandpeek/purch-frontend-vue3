@@ -31,7 +31,7 @@ const props = defineProps ({
     type: String,
     required: true, 
   },
-  mneasure: {
+  measure: {
     type: String,
     required: true, 
   },
@@ -40,7 +40,7 @@ const props = defineProps ({
     required: true, 
   },
   vendorList: {
-    type: String,
+    type: Array,
     required: true, 
   },
 })

@@ -64,6 +64,7 @@ const router = createRouter({
     },
     {
       path: "/vendors/invoices/:invoiceId",
+      name: 'vendor-invoice-details',
       component: VendorInvoiceDetail,
       props: true,
     },

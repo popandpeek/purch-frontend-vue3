@@ -1,9 +1,9 @@
 <template>
   <base-card>
     <h1>PRODUCTS</h1>
-    <div v-if="hasItems">
+    <div v-if="vendorItems">
       <VendorProductItem
-        v-for="item in vendorProductItems"
+        v-for="item in vendorItems"
         :id="item.id"
         :key="item.id"
         :name="item.name"
@@ -24,16 +24,16 @@
  */
 import VendorProductItem from "../../../components/vendors/vendor-products/VendorProductItem.vue";
 import { useVendorItemStore } from '../../../stores/vendor-items'
-import { defineProps, computed } from "vue";
+import { defineProps } from "vue";
 import { storeToRefs } from "pinia";
 
 /**
  * store
  */
 const { vendorItems } = storeToRefs(useVendorItemStore())
-const { fetchVendorItems } = useVendorItemStore()
+const { fetchVendorItemsPerVendor } = useVendorItemStore()
 
-fetchVendorItems()
+fetchVendorItemsPerVendor(props.vendorId)
 
 /**
  * props
@@ -44,17 +44,6 @@ const props = defineProps ({
     required: true
   }
 }) 
-
-/**
- * computed
- */
-const vendorProductItems = computed(() => {
-  return vendorItems.filter((item) => item.vendorId === props.vendorId)
-})
-
-const hasItems = computed(() => {
-  return vendorProductItems.value.length > 0
-})
 
 </script>
 

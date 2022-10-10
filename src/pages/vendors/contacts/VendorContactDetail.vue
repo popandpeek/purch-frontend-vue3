@@ -1,6 +1,6 @@
 <template>
   <base-card>
-    <h2>{{ vendorName }}</h2>
+    <h2>{{ vendor.name }}</h2>
     <div class="actions">
       <base-button @click="backToVendors">
         Back
@@ -14,10 +14,10 @@
 /**
  * imports
  */
-import { defineProps, computed } from 'vue';
+import { defineProps } from 'vue';
 import { useVendorStore } from '../../../stores/vendors';
 import { useRouter } from 'vue-router';
-
+import { storeToRefs } from 'pinia'
 /**
  * router
  */
@@ -26,13 +26,15 @@ const router = useRouter()
 /**
  * store
  */
-const vendors = useVendorStore()
+const { vendor } = storeToRefs(useVendorStore())
+const { fetchVendor } = useVendorStore()
+fetchVendor(props.vendorId)
 
 /**
  * props
  */
 const props = defineProps ({
-  id: {
+  vendorId: {
     type: String,
     required: true
   }
@@ -41,17 +43,17 @@ const props = defineProps ({
 /**
  * computed
  */
-const vendorItem = computed(() => {
-  return vendors.vendors.find((vendor) => vendor.id === props.id)
-})
+// const vendorItem = computed(() => {
+//   return vendor
+// })
 
-const vendorName = computed(() => {
-  return vendorItem.value.name
-})
+// const vendorName = computed(() => {
+//   return vendorItem.value.name
+// })
 
-const backToVendors = computed(() => {
+const backToVendors = () => { 
   return router.go(-1)
-})
+}
 
 </script>
 

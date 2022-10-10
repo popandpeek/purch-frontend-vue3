@@ -7,7 +7,7 @@ export const useInvoiceStore = defineStore({
     invoices: [],
   }),
   getters: {
-    invoices: (state) => { 
+    getInvoices: (state) => { 
       return state.invoices
     },
     hasInvoices: (state) => {
@@ -17,6 +17,9 @@ export const useInvoiceStore = defineStore({
   actions: {
     fetchVendorInvoices() {
       this.invoices = json
+    },
+    fetchVendorInvoicesPerVendor(vendorId) {
+      this.invoices = json.filter((invoice) => invoice.vendorId === vendorId)
     }
   },
 });

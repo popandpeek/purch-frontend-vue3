@@ -12,7 +12,7 @@
       </base-button>
     </div>
   </base-card>
-  <section>
+  <base-card>
     <div v-if="hasInvoiceItems">
       <li
         v-for="invItem in invoiceItems"
@@ -27,7 +27,7 @@
     <h3 v-else>
       No items on invoice!
     </h3>
-  </section>
+  </base-card>
 </template>
 
 <script setup>

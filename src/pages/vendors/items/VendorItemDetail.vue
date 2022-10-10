@@ -38,7 +38,7 @@ const vendorProductItems = useVendorItemStore()
 const props = defineProps ({
   vendorItemId: {
     type: String,
-    default: "",
+    required: true,
   }
 })
 
@@ -46,7 +46,7 @@ const props = defineProps ({
  * computed
  */
 const selectedItem = computed(() => {
-  return vendorProductItems.items.find( (item) => item.id === props.vendorItemId)
+  return vendorProductItems.vendorItems.find( (item) => item.id === props.vendorItemId)
 })
 
 const productName = computed(() => {

@@ -17,6 +17,9 @@ export const useVendorItemStore = defineStore({
   actions: {
     fetchVendorItems() {
       this.vendorItems = json
+    }, 
+    fetchVendorItemsPerVendor(vendorId) {
+      this.vendorItems = json.filter((item) => item.vendorId === vendorId)
     }
   },
 });

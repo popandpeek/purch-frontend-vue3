@@ -10,7 +10,7 @@
       </div>
     </base-card>
     <base-card>
-      <div v-if="hasOrderItems">
+      <div v-if="orderItems">
         <li
           v-for="orderItem in orderItems"
           :key="orderItem"
@@ -61,7 +61,7 @@ const props = defineProps ({
  * computed
  */
 const vendorOrderItems = computed(() => {
-  return vendorOrders.orders.find((order) => (order.id === props.vendorOrderId))
+  return vendorOrders.vendorOrders.find((order) => (order.id === props.vendorOrderId))
 })
 
 const vendorName = computed(() => {
@@ -74,10 +74,6 @@ const orderDate = computed(() => {
 
 const orderItems = computed(() => {
   return vendorOrderItems.value.items
-})
-
-const hasOrderItems = computed(() => {
-  return vendorOrderItems.value && vendorOrderItems.value.items.length > 0
 })
 
 /**

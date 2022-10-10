@@ -5,6 +5,9 @@ export const useVendorStore = defineStore({
   id: 'vendorsStore',
   state: () => ({
     vendors: [],
+    vendor: null,
+    loading: false,
+    error: null
   }),
   getters: {
     getVendors: (state) => {
@@ -17,6 +20,9 @@ export const useVendorStore = defineStore({
   actions: {
     fetchVendors() {
       this.vendors = json
+    },
+    fetchVendor(vendorId) {
+      this.vendor = json.find((vendor) => vendor.id === vendorId)
     }
   },
 });

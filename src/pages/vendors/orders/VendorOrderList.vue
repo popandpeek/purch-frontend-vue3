@@ -1,9 +1,9 @@
 <template>
   <base-card>
     <h1>ORDERS</h1>
-    <div v-if="hasOrders">
+    <div v-if="vendorOrders">
       <VendorOrderItem
-        v-for="order in filteredOrders"
+        v-for="order in vendorOrders"
         :id="order.id"
         :key="order.id"
         :date="order.date"
@@ -21,22 +21,16 @@
  */
 import VendorOrderItem from "../../../components/vendors/vendor-orders/VendorOrderItem.vue";
 import { useVendorOrderStore } from '../../../stores/vendor-orders'
-import { defineProps, computed } from 'vue'
+import { defineProps } from 'vue'
 import { storeToRefs } from 'pinia'
-// import { useRoute } from 'vue-router'
 
 /**
  * store
  */
 const { vendorOrders } = storeToRefs(useVendorOrderStore())
-const { fetchVendorOrders } = useVendorOrderStore()
+const { fetchVendorOrdersPerVendor } = useVendorOrderStore()
 
-fetchVendorOrders()
-
-/**
- * route
- */
-// const route = useRoute()
+fetchVendorOrdersPerVendor(props.vendorId)
 
 /**
  * props
@@ -46,14 +40,6 @@ const props = defineProps({
     type: String,
     required: true
   },
-})
-
-const filteredOrders = computed(() => {
-  return vendorOrders.filter((order) => order.vendorId === props.vendorId)
-})
-
-const hasOrders = computed(() => {
-  return filteredOrders.value && filteredOrders.value.length > 0
 })
 
 </script>
