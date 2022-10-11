@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { VueQueryPlugin } from 'vue-query';
 
 import router from "./router.js";
 // import pinia from "./store/index.js";
@@ -15,6 +16,7 @@ import bootsrapVue from "bootstrap-vue/dist/bootstrap-vue.css";
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+app.use(VueQueryPlugin)
 app.use(bootstrapCSS);
 app.use(bootsrapVue);
 
