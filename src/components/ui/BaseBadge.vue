@@ -20,6 +20,8 @@ export default {
 
 <style scoped>
 .badge {
+  @import url('https://fonts.googleapis.com/css?family=Proza+Libre');
+  font-family: 'Proza Libre', sans-serif;
   background-color: #ccc;
   color: #252525;
   border-radius: 30px;

@@ -5,13 +5,13 @@
       "submitted": false,
       "items": [
         {
-          "id": "crtblk",
+          "itemId": "crtblk",
           "quantity": "1",
           "measure": "case",
           "price": "19.65"
         },
         {
-          "id": "codfrz",
+          "itemId": "codfrz",
           "quantity": "20",
           "measure": "lb",
           "price": "49.65"

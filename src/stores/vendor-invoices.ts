@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/vendor-invoice-data.json"
+import { VendorInvoice } from "@/api/model";
 
 export const useInvoiceStore = defineStore({ 
   id: "invoicesStore",
   state: () => ({
-    invoices: [],
+    invoices: [] as VendorInvoice[],
   }),
   getters: {
     getInvoices: (state) => { 
@@ -18,7 +19,7 @@ export const useInvoiceStore = defineStore({
     fetchVendorInvoices() {
       this.invoices = json
     },
-    fetchVendorInvoicesPerVendor(vendorId) {
+    fetchVendorInvoicesPerVendor(vendorId: string) {
       this.invoices = json.filter((invoice) => invoice.vendorId === vendorId)
     }
   },

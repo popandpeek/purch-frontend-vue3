@@ -5,7 +5,7 @@
         "submitted": true,
         "items": [
             {
-                "houseItem": "crtblk",
+                "houseItemId": "crtblk",
                 "quantity": "12",
                 "measure": "lb"
             }

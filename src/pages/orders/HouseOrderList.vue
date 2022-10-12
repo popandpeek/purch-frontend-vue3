@@ -32,3 +32,6 @@ const { fetchOrderItems } = useHouseOrderStore()
 fetchOrderItems()
 
 </script>
+
+<style>
+</style>

@@ -1,11 +1,11 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/inventory-data.json"
+import { Inventory } from "@/api/model";
 
 export const useInventoriesStore = defineStore({ 
   id: 'inventoriesStore',
   state: () => ({
-    storageLocations: [],
-    inventories: [],
+    inventories: [] as Inventory[],
   }),
   getters: {
     getInventories: (state) => {

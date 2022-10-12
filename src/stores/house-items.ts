@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/house-item-data.json"
+import { HouseItem } from "@/api/model";
 
 export const useHouseItemsStore = defineStore({
   id: "houseItemsStore",
   state: () => ({
-    items: [],
-    loading: false,
-    error: null,
+    items: [] as HouseItem[]
   }),
   getters: {
     getItems: (state) => {
@@ -19,6 +18,6 @@ export const useHouseItemsStore = defineStore({
   actions: {
     fetchHouseItems() {
       this.items = json
-    },
-  },
+    }
+  }
 });

@@ -1,7 +1,7 @@
 <template>
   <div>
     <base-input-list-item>
-      <p>{{ props.id }}</p>
+      <p>{{ props.itemId }}</p>
       <p>${{ props.price }}</p>
       <p>{{ props.measure }}</p>
       <input v-model="amount" type="number" />
@@ -26,6 +26,10 @@ const orderStore = useHouseOrderStore()
 */
 const props = defineProps ({
   id: {
+    type: String,
+    required: true
+  },
+  itemId: {
     type: String,
     required: true
   },
@@ -56,8 +60,8 @@ const amount = computed({
   },
   set(newValue) {
     orderStore.setQuantity({
-      houseOrderId: props.orderId,
-      itemId: props.id,
+      id: props.orderId,
+      itemId: props.itemId,
       updatedQuantity: newValue,
     })
   },

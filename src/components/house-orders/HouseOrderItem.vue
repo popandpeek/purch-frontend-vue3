@@ -12,7 +12,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /*
   imports
 */

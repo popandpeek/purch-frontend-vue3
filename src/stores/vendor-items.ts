@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/vendor-item-data.json"
+import { VendorItem } from "@/api/model";
 
 export const useVendorItemStore = defineStore({ 
   id: "vendorItemsStore",
   state: () => ({
-    vendorItems: [],
+    vendorItems: [] as VendorItem[],
   }),
   getters: {
     getItems: (state) => {
@@ -18,7 +19,7 @@ export const useVendorItemStore = defineStore({
     fetchVendorItems() {
       this.vendorItems = json
     }, 
-    fetchVendorItemsPerVendor(vendorId) {
+    fetchVendorItemsPerVendor(vendorId: string) {
       this.vendorItems = json.filter((item) => item.vendorId === vendorId)
     }
   },

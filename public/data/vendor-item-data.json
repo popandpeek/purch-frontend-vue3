@@ -9,7 +9,7 @@
     "packWeight": "lb",
     "packQuantity": "20",
     "curPrice": "59.62",
-    "pastPrices": [{ "date": "", "price": "" }]
+    "pastPrices": []
   },
   {
     "id": "015456465",
@@ -21,7 +21,7 @@
     "packWeight": "lb",
     "packQuantity": "20",
     "curPrice": "63.21",
-    "pastPrices": [{ "date": "", "price": "" }]
+    "pastPrices": []
   },
   {
     "id": "015456466",
@@ -33,6 +33,6 @@
     "packWeight": "lb",
     "packQuantity": "50",
     "curPrice": "18.65",
-    "pastPrices": [{ "date": "", "price": "" }]
+    "pastPrices": []
   }
 ]

@@ -28,7 +28,7 @@
           :type="invItem"
           :title="invItem"
         >
-          {{ invItem.houseItem }} --- {{ invItem.quantity
+          {{ invItem.houseItemId }} --- {{ invItem.quantity
           }}{{ invItem.measure }}
         </li>
       </div>
