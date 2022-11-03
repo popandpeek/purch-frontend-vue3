@@ -20,7 +20,7 @@ export const useVendorOrderStore = defineStore({
       this.vendorOrders = json
     },
     fetchVendorOrdersPerVendor(vendorId: string) {
-      this.vendorOrders = json.filter((order) => order.vendorId === vendorId)
+      this.vendorOrders = json.filter((order) => order.vendor_id === vendorId)
     }
   },
 });

@@ -27,11 +27,11 @@ export const useHouseOrderStore = defineStore({
       const items = orderObj?.items;
 
       //  Third: get HouseOrderItem from list of HouseOrderItem's
-      const item = items?.find((y) => y.itemId === payload.id);
+      const item = items?.find((y) => y.id === payload.id);
 
       //  Fourth: set HouseOrderItem quantity
       if (item) {
-        item.quantity = payload.updatedQuantity;
+        item.quantity = payload.updated_quantity;
       } else {
         console.log("Item to update not found!")
       }

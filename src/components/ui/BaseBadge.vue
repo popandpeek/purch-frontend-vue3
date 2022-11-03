@@ -23,7 +23,7 @@ export default {
   @import url('https://fonts.googleapis.com/css?family=Proza+Libre');
   font-family: 'Proza Libre', sans-serif;
   background-color: #ccc;
-  color: #252525;
+  color: #3D008D;
   border-radius: 30px;
   padding: 0.5rem 1.5rem;
   display: inline-block;

@@ -1,17 +1,19 @@
 [
   {
     "id": "7",
+    "vendor_id": "1",
     "date": "9/16/2021",
-    "vendorId": "1",
-    "vendorName": "MacDonald Meats",
-    "items": [
+    "submitted": true,
+    "vendor_invoice_id": null,
+    "vendor_order_items": [
       {
-        "itemId": "codfrz",
-        "vendorItemId": "4368531",
-        "quantity": "20",
-        "measure": "lb",
+        "id": "codfrz",
+        "vendor_item_id": "4368531",
+        "vendor_order_id": "1",
+        "vendor_invoice_id": "1",
         "price": "2.981",
-        "costExtended": "59.62"
+        "quantity": "20",
+        "measure": "lb"
       }
     ]
   }

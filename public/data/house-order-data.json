@@ -5,18 +5,22 @@
       "submitted": false,
       "items": [
         {
-          "itemId": "crtblk",
+          "id": "crtblk",
+          "house_item_id": "",
+          "house_order_id": "",
           "quantity": "1",
           "measure": "case",
           "price": "19.65"
         },
         {
-          "itemId": "codfrz",
+          "id": "codfrz",
+          "house_item_id": "",
+          "house_order_id": "",
           "quantity": "20",
           "measure": "lb",
           "price": "49.65"
         }
       ],
-      "users": [{ "userId": "" }]
+      "user_id": ""
     }
 ]

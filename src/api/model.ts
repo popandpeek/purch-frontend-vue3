@@ -1,24 +1,45 @@
 export interface HouseItem {
     id: string,
+    item_class_id: string,
     name: string,
     description: string,
-    vendorList: null| Array<string>,
-    vendorItemIdList: null | Array<string>,
-    storageLocations: null | Array<string>,
-    measure: string,
-    lastPrice: null | string
+    active: boolean,
+    measure_unit: string,
+    cur_price: null | string,
+    default_vendor_item_id: null | string,
+    item_class: null | Array<ItemClass>,
+    house_order_items: null | Array<HouseOrderItem>,
+    house_inventory_items: null | Array<InventoryItem>,
+    vendor_items: null | Array<VendorItem>,
+    storage_locations: null | Array<string>
+}
+
+export interface ItemClass {
+    id: string,
+    type: string,
+    house_items: null | Array<HouseItem>
+}
+
+
+export interface StorageLocation {
+    id: string,
+    name: string,
+    storage_type: string,
+    house_items: null | Array<HouseItem>
 }
 
 export interface HouseOrder {
     id: string,
-    date?: string,
-    submitted?: boolean,
+    date: null | string,
+    submitted: null | boolean,
     items: null | Array<HouseOrderItem>,
-    users: null | Array<object>
+    user_id: null | string
 }
 
 export interface HouseOrderItem {
-    itemId: string,
+    id: string,
+    house_item_id: string,
+    house_order_id: string,
     quantity: string,
     measure: string,
     price: string
@@ -26,81 +47,100 @@ export interface HouseOrderItem {
 
 export interface HouseOrderUpdateItem {
     id: string,
-    itemId: string,
-    updatedQuantity: string,
+    house_item_id: string,
+    updated_quantity: string,
 }
 
 export interface Inventory {
     id: string,
     date: string
     submitted: boolean,
-    items: Array<InventoryItem>
+    inventory_items: Array<InventoryItem>
 }
 
 export interface InventoryItem {
-    houseItemId: string,
+    id: string,
+    house_item_id: string,
+    inventory_id: string,
+    date: string,
     quantity: string,
-    measure: string
+    measure_unit: string
+    price: null | string
 }
 
 export interface Vendor {
     id: string,
-    accountNumber: string,
     name: string,
-    address: string,
+    account_number: string,
+    address1: string,
+    address2: null | string,
+    address_city: string,
+    address_state: string,
+    address_zip: string,
+    contact_name_first: string,
+    contact_name_last: string,
+    contact_email: string,
     phone: string,
     email: string
-    deliveryDays: null | Array<string>,
-    deliveryTimes: null | Array<string>,
-    contactList?: null | Array<string>
+    delivery_days: null | Array<string>,
+    delivery_times: null | Array<string>,
 }
 
 export interface VendorOrder {
     id: string,
+    vendor_id: string,
     date: string,
-    vendorId: string,
-    vendorName: string,
-    items: null | Array<VendorOrderItem>
+    submitted: boolean,
+    vendor_invoice_id: null | string,
+    vendor_order_items: null | Array<VendorOrderItem>
 }
 
 export interface VendorOrderItem {
-    itemId: string,
-    vendorItemId: string,
+    id: string,
+    vendor_item_id: string,
+    vendor_order_id: string,
+    vendor_invoice_id: string,
+    price: string,
     quantity: string,
     measure: string,
-    price: string,
-    costExtended: string
 }
 
 export interface VendorItem {
     id: string,
-    name: string,
+    active: boolean,
+    vendor_id: string,
+    house_item_id: string,
+    vendor_item_id: string,
+    vendor_SKU: string,
+    product_name: string,
     description: string,
-    vendorId: string,
-    VendorItemId: string,
-    packSize: string,
-    packWeight: string,
-    packQuantity: string,
-    curPrice: string,
-    pastPrices: null | Array<[string, string]>
+    latest_price: string,
+    measure_unit: string,
+    pack_size: string,
+    pack_number: string,
+    brand_name: string,
+    vendor_order_items: null | Array<VendorOrderItem>,
+    vendor_invoice_items: null | Array<VendorInvoiceItem>
 }
 
 export interface VendorInvoice {
     id: string,
+    vendor_id: string,
+    vendor_order_id: string,
     date: string,
-    vendorId: string,
-    vendorName: string,
-    invoiceDocId: string,
-    status: string,
-    items: null | Array<VendorInvoiceItem>
+    invoice_doc_id: string,
+    paid: boolean,
+    vendor_invoice_items: null | Array<VendorInvoiceItem>
 }
 
 export interface VendorInvoiceItem {
     id: string,
-    description: string,
-    packSize: string,
-    packWeight: string,
-    packQuantity: string,
+    vendor_invoice_id: string,
+    vendor_order_item_id: string,
+    vendor_item_id: string,
+    measure_unit: string,
+    pack_size: string,
+    pack_number: string,
     price: string,
     quantity: string
 }

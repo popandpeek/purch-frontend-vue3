@@ -1,22 +1,32 @@
 [
     {
       "id": "crtblk",
+      "item_class_id": "",
       "name": "Carrot, bulk",
       "description": "raw unpeeled carrots",
-      "vendorList": ["Charlies Produce"],
-      "vendorItemIdList": [],
-      "storageLocations": [],
-      "measure": "lb",
-      "lastPrice": "0.59"
+      "active": true,
+      "measure_unit": "lb",
+      "cur_price": "0.59",
+      "default_vendor_item_id": null,
+      "item_class": null,
+      "house_order_items": null,
+      "house_inventory_items": null,
+      "vendor_items": null,
+      "storage_locations": null
     },
     {
-      "id": "codfrz",
-      "name": "Cod, frozen",
-      "description": "Flash frozen at sea, shatterpack",
-      "vendorList": ["MacDonald Meats", "Pacific Seafood"],
-      "vendorItemIdList": [],
-      "storageLocations": [],
-      "measure": "lb",
-      "lastPrice": "5.39"
+      "id": "ptblk",
+      "item_class_id": "",
+      "name": "potato, #2, raw",
+      "description": "#2 Bakers, bulk",
+      "active": true,
+      "measure_unit": "pound",
+      "cur_price": "0.89",
+      "default_vendor_item_id": null,
+      "item_class": null,
+      "house_order_items": null,
+      "house_inventory_items": null,
+      "vendor_items": null,
+      "storage_locations": null
     }
 ]

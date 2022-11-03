@@ -3,11 +3,15 @@
         "id": "11589",
         "date": "9/30/2021",
         "submitted": true,
-        "items": [
+        "inventory_items": [
             {
-                "houseItemId": "crtblk",
+                "id": "crtblk",
+                "house_item_id": "crtblk",
+                "inventory_id": "11589",
+                "date": "9/30/2021",
                 "quantity": "12",
-                "measure": "lb"
+                "measure_unit": "lb",
+                "price": ""
             }
         ]
     }

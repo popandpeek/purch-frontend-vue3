@@ -1,35 +1,53 @@
 [
   {
     "id": "1",
-    "accountNumber": "",
     "name": "MacDonald Meats",
-    "address": "2701 Airport Way S, Seattle, WA, 98101",
+    "account_number": "",
+    "address1": "2701 Airport Way S",
+    "address2": null,
+    "address_city": "Seattle",
+    "address_state": "WA",
+    "address_zip": "98101",
+    "contact_name_first": "",
+    "contact_name_last": "",
+    "contact_email": "",
     "phone": "206-555-9874",
     "email": "orders@macmeats.com",
-    "deliveryDays": [],
-    "deliveryTimes": [],
-    "contactList": []
+    "delivery_days": null,
+    "delivery_times": null
   },
   {
     "id": "2",
-    "accountNumber": "",
     "name": "Charlies Produce",
-    "address": "987 15th Ave SW, Seattle, WA 98115",
+    "account_number": "",
+    "address1": "987 15th Ave SW",
+    "address2": null,
+    "address_city": "Seattle",
+    "address_state": "WA",
+    "address_zip": "98115",
+    "contact_name_first": "",
+    "contact_name_last": "",
+    "contact_email": "",
     "phone": "206-555-1234",
     "email": "orders@charlies.com",
-    "deliveryDays": [],
-    "deliveryTimes": [],
-    "contactList": []
+    "delivery_days": null,
+    "delivery_times": null
   },
   {
     "id": "3",
-    "accountNumber": "",
     "name": "Pacific Seafood",
-    "address": "123 5th St, Seattle, WA, 98101",
+    "account_number": "",
+    "address1": "123 5th St",
+    "address2": null,
+    "address_city": "Seattle",
+    "address_state": "WA",
+    "address_zip": "98101",
+    "contact_name_first": "",
+    "contact_name_last": "",
+    "contact_email": "",
     "phone": "206-111-5555",
     "email": "sales@pacificseafood.com",
-    "deliveryDays": [],
-    "deliveryTimes": [],
-    "contactList": []
+    "delivery_days": null,
+    "delivery_times": null
   }
 ]

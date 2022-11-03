@@ -67,7 +67,7 @@ h1 a {
   @import url('https://fonts.googleapis.com/css?family=Proza+Libre');
   font-family: 'Proza Libre', sans-serif;
   font-weight: 500;
-  color: white;
+  color: #f391e3;
   margin: 0;
 }
 

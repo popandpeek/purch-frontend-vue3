@@ -20,7 +20,7 @@ export const useInvoiceStore = defineStore({
       this.invoices = json
     },
     fetchVendorInvoicesPerVendor(vendorId: string) {
-      this.invoices = json.filter((invoice) => invoice.vendorId === vendorId)
+      this.invoices = json.filter((invoice) => invoice.vendor_id === vendorId)
     }
   },
 });
