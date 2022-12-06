@@ -12,7 +12,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router';
  */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true, 
   },
   name: {
@@ -35,14 +35,10 @@ const props = defineProps ({
     type: String,
     required: true, 
   },
-  lastPrice: {
+  curPrice: {
     type: String,
     required: true, 
-  },
-  vendorList: {
-    type: Array,
-    required: true, 
-  },
+  }
 })
 
 /**

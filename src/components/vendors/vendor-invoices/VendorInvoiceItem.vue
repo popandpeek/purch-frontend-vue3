@@ -1,9 +1,11 @@
 <template>
   <base-input-list-item>
-    <h3>date: {{ props.date }}</h3>
-    <h5>invoice #: {{ props.docId }}</h5>
-    <div class="actions">
-      <base-button
+    <h5>
+      Date: {{ props.date }} <br/><br/>
+      Invoice#: {{ props.docId }}
+    </h5>
+    <div class="actions" >
+      <base-button 
         link
         :to="'/vendors/invoices/' + props.id"
       >
@@ -13,7 +15,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
@@ -24,7 +26,7 @@ import { defineProps } from "vue"
  */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true
   },
   date: {
@@ -36,9 +38,9 @@ const props = defineProps ({
     required: true
   },
   status: {
-    type: String,
+    type: Boolean,
     required: true
-  }
+  },
 })
 
 </script>
@@ -63,10 +65,11 @@ h4 {
 
 div {
   margin: 0.5rem 0;
+
 }
 
 .actions {
-  display: flex;
   justify-content: flex-end;
+  align-items: center;
 }
 </style>

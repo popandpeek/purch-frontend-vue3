@@ -7,9 +7,8 @@
         :id="item.id"
         :key="item.id"
         :name="item.name"
-        :measure="item.measure"
-        :last-price="item.lastPrice"
-        :vendor-list="item.vendorList"
+        :measure="item.measure_unit"
+        :cur-price="item.cur_price"
       />
     </div>
     <h3 v-else>
@@ -18,7 +17,7 @@
   </base-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import HouseProductItem from '../../components/house-products/HouseProductItem.vue'
 import { useHouseItemsStore } from '../../stores/house-items'
 import { storeToRefs } from 'pinia';

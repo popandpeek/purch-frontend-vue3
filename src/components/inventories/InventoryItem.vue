@@ -12,7 +12,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
@@ -29,7 +29,7 @@ const route = useRoute()
  */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true, 
   },
   date: {

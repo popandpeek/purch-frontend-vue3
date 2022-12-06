@@ -3,13 +3,14 @@
     <h1>PRODUCTS</h1>
     <div v-if="vendorItems">
       <VendorProductItem
-        v-for="item in vendorItems"
+        v-for="item in items"
         :id="item.id"
         :key="item.id"
-        :name="item.name"
-        :price="item.curPrice"
-        :pack-quantity="item.packQuantity"
-        :pack-weight="item.packWeight"
+        :name="item.product_name"
+        :price="item.latest_price"
+        :measure-unit="item.measure_unit"
+        :pack-size="item.pack_size"
+        :pack-number="item.pack_number"
       />
     </div>
     <h3 v-else>
@@ -18,22 +19,23 @@
   </base-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
 import VendorProductItem from "../../../components/vendors/vendor-products/VendorProductItem.vue";
 import { useVendorItemStore } from '../../../stores/vendor-items'
-import { defineProps } from "vue";
+import { computed, defineProps } from "vue";
 import { storeToRefs } from "pinia";
 
 /**
  * store
  */
+const itemsStore = useVendorItemStore()
 const { vendorItems } = storeToRefs(useVendorItemStore())
-const { fetchVendorItemsPerVendor } = useVendorItemStore()
+const { fetchAllVendorItems } = useVendorItemStore()
 
-fetchVendorItemsPerVendor(props.vendorId)
+fetchAllVendorItems()
 
 /**
  * props
@@ -44,6 +46,13 @@ const props = defineProps ({
     required: true
   }
 }) 
+
+/**
+ * computed
+ */
+const items = computed(() => {
+  return itemsStore.vendorItems.filter(function(obj) {return obj.vendor_id === Number(props.vendorId)})
+});
 
 </script>
 

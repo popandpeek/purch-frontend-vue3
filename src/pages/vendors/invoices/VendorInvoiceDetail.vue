@@ -3,99 +3,109 @@
     <div>
       <h2>{{ vendorName }}</h2>
       <h3>{{ invoiceDate }}</h3>
-      <h5>invoice #: {{ documentId }}</h5>
-      <h5>status: {{ invoiceStatus }}</h5>
+      <h5>#{{ documentId }}</h5>
+      <h5>{{ invoiceStatus }}</h5>
     </div>
     <div class="actions">
-      <base-button @click="backwards">
-        Back
-      </base-button>
+      <base-button @click="backwards"> Back </base-button>
     </div>
   </base-card>
   <base-card>
     <div v-if="hasInvoiceItems">
-      <li
-        v-for="invItem in invoiceItems"
-        :key="invItem"
-        :type="invItem"
-        :title="invItem"
-      >
-        {{ invItem.id }} - {{ invItem.description }} - {{ invItem.quantity
-        }}{{ invItem.packWeight }}
+      <li>
+        <VendorInvoiceListItem
+          v-for="invItem in invoiceItems"
+          :id="invItem.id"
+          :key="invItem.id"
+          :vendor-item-id="invItem.vendor_item_id"
+          :quantity="invItem.quantity"
+          :measure="invItem.measure_unit"
+          :price="invItem.price"
+        />
       </li>
     </div>
-    <h3 v-else>
-      No items on invoice!
-    </h3>
+    <h3 v-else>No items on invoice!</h3>
   </base-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
-import { defineProps, computed } from "vue"
-import { useInvoiceStore } from "../../../stores/vendor-invoices"
-import { useRouter } from 'vue-router'
+import { defineProps, computed } from "vue";
+import { useInvoiceStore } from "../../../stores/vendor-invoices";
+import { useRouter } from "vue-router";
+import VendorInvoiceListItem from "@/components/vendors/vendor-invoices/VendorInvoiceListItem.vue";
+import { useVendorStore } from "@/stores/vendors";
 
-/** 
+/**
  * store
  */
-const invoiceStore = useInvoiceStore()
+const invoiceStore = useInvoiceStore();
+const vendorStore = useVendorStore();
+const {fetchVendors} = useVendorStore();
 
-/** 
+fetchVendors();
+
+/**
  * router
  */
-const router = useRouter()
+const router = useRouter();
 
 /**
  * props
  */
-const props = defineProps ({
+const props = defineProps({
   invoiceId: {
     type: String,
-    required: true
+    required: true,
   }
-})
+});
 
 /**
  * computed
  */
 const invoiceItem = computed(() => {
-  return invoiceStore.invoices.find((invoice) => invoice.id === props.invoiceId)
-})
-
-const vendorName = computed(() => {
-  return invoiceItem.value.vendorName
-})
+  return invoiceStore.vendor_invoices.find(
+    (invoice) => invoice.id === Number(props.invoiceId)
+  );
+});
 
 const documentId = computed(() => {
-  return invoiceItem.value.invoiceDocId
-})
+  return invoiceItem.value?.invoice_doc_id;
+});
 
 const invoiceDate = computed(() => {
-  return invoiceItem.value.date
-})
+  return invoiceItem.value?.date;
+});
 
 const invoiceStatus = computed(() => {
-  return invoiceItem.value.status
-})
+  const status = invoiceItem.value?.paid;
+  if (status) {
+    return "PAID"
+  } else {
+    return "OUTSTANDING"
+  }
+});
 
 const invoiceItems = computed(() => {
-  return invoiceItem.value.items
-})
+  return invoiceItem.value?.vendor_invoice_items;
+});
 
 const hasInvoiceItems = computed(() => {
-  return invoiceItem.value.items.length > 0
+  return invoiceItem.value?.vendor_invoice_items != null;
+});
+
+const vendorName = computed(() => {
+  return vendorStore.vendors.find( (vendor)=> vendor.id === invoiceItem.value?.vendor_id)?.name
 })
 
 /**
  * methods
  */
 const backwards = () => {
-  return router.go(-1)
-}
-
+  return router.go(-1);
+};
 </script>
 
 <style scoped>

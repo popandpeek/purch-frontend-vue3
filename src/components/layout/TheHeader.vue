@@ -9,12 +9,12 @@
       <ul>
         <li>
           <router-link to="/orders">
-            House Orders
+            Orders
           </router-link>
         </li>
         <li>
           <router-link to="/items">
-            House Items
+            Products
           </router-link>
         </li>
         <li>

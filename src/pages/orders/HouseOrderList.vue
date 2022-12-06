@@ -15,7 +15,7 @@
   </base-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */

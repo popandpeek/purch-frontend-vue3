@@ -13,7 +13,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
@@ -24,19 +24,23 @@ import { defineProps, computed } from 'vue';
  */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true
   },
   name: {
     type: String,
     required: true
   },
-  packWeight: {
+  measureUnit: {
     type: String,
     required: true
   },
-  packQuantity: {
-    type: String,
+  packSize: {
+    type: Number,
+    required: true
+  },
+  packNumber: {
+    type: Number,
     required: true
   },
   price: {
@@ -49,7 +53,7 @@ const props = defineProps ({
  * computed
  */
 const productMeasure = computed(() => {
-  return props.packQuantity + ' / ' + props.packWeight
+  return props.packNumber + 'x' + props.packSize + ' / ' + props.measureUnit
 })
 
 </script>

@@ -12,7 +12,6 @@ import BaseInputListItem from './components/ui/BaseInputListItem.vue'
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
-app.use(VueQueryPlugin)
 
 app.component('BaseCard', BaseCard);
 app.component('BaseButton', BaseButton);

@@ -1,6 +1,6 @@
 <template>
   <base-input-list-item>
-    <h3>{{ orderDate }}</h3>
+    <h3>{{ props.date }}</h3>
     <div class="actions">
       <base-button
         link
@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router';
 */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true, 
   },
   date: {
@@ -41,10 +41,6 @@ const route = useRoute()
 /*
   computed
 */
-const orderDate = computed(() => {
-  return props.date
-})
-
 const viewOrderDetails = computed(() => {
   return route.path + '/' + props.id
 })

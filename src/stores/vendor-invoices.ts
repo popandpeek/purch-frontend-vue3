@@ -1,26 +1,28 @@
 import { defineStore } from "pinia";
-import json from "../../public/data/vendor-invoice-data.json"
 import { VendorInvoice } from "@/api/model";
+import axios from "../http-common";
 
 export const useInvoiceStore = defineStore({ 
   id: "invoicesStore",
   state: () => ({
-    invoices: [] as VendorInvoice[],
+    vendor_invoices: [] as VendorInvoice[],
   }),
   getters: {
     getInvoices: (state) => { 
-      return state.invoices
+      return state.vendor_invoices
     },
     hasInvoices: (state) => {
-      return state.invoices && state.invoices.length > 0
+      return state.vendor_invoices && state.vendor_invoices.length > 0
     }
   },
   actions: {
-    fetchVendorInvoices() {
-      this.invoices = json
+    async fetchAllVendorInvoices() {
+      const response = await axios.get('/invoices/')
+      this.vendor_invoices = response.data
     },
-    fetchVendorInvoicesPerVendor(vendorId: string) {
-      this.invoices = json.filter((invoice) => invoice.vendor_id === vendorId)
+    async fetchVendorInvoicesPerVendor(vendorId: string) {
+      const response = await axios.get('/invoices/' + Number(vendorId))
+      this.vendor_invoices = response.data
     }
   },
 });

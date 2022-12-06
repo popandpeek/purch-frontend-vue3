@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/house-item-data.json"
 import { HouseItem } from "@/api/model";
+import axios from "../http-common";
 
 export const useHouseItemsStore = defineStore({
   id: "houseItemsStore",
@@ -16,8 +17,9 @@ export const useHouseItemsStore = defineStore({
     },
   },
   actions: {
-    fetchHouseItems() {
-      this.items = json
+    async fetchHouseItems() {
+      const response = await axios.get('/house_items');
+      this.items = response.data;
     }
   }
 });

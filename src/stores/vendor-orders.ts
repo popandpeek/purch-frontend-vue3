@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/vendor-order-data.json"
 import { VendorOrder } from "@/api/model";
+import axios from "../http-common";
 
 export const useVendorOrderStore = defineStore({ 
   id: "vendorOrdersStore", 
@@ -16,11 +17,13 @@ export const useVendorOrderStore = defineStore({
     }
   },
   actions: {
-    fetchVendorOrders() {
-      this.vendorOrders = json
+    async fetchVendorOrders() {
+      const response = await axios.get('/vendor_orders/')
+      this.vendorOrders = response.data
     },
-    fetchVendorOrdersPerVendor(vendorId: string) {
-      this.vendorOrders = json.filter((order) => order.vendor_id === vendorId)
+    async fetchVendorOrdersPerVendor(vendorId: number) {
+      const response = await axios.get('/vendor_orders/' + vendorId)
+      this.vendorOrders = response.data
     }
   },
 });

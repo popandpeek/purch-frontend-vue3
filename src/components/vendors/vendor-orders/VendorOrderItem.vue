@@ -12,7 +12,7 @@
   </base-input-list-item>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
@@ -23,7 +23,7 @@ import { defineProps } from 'vue'
  */
 const props = defineProps ({
   id: {
-    type: String,
+    type: Number,
     required: true
   },
   date: {

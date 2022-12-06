@@ -3,93 +3,98 @@
     <base-card>
       <h2>{{ inventoryDate }}</h2>
       <h3>Status:</h3>
-      <h5 v-if="inventorySubmitted">
-        CLOSED
-      </h5>
-      <h6 v-else>
-        OPEN
-      </h6>
+      <h5 v-if="inventorySubmitted">SUBMITTED</h5>
+      <h6 v-else>OPEN</h6>
       <div class="actions">
-        <base-button @click="backToInventories">
-          BACK
-        </base-button>
+        <base-button @click="backToInventories"> BACK </base-button>
       </div>
     </base-card>
   </section>
   <section>
     <base-card>
-      <p>
-        {{ productDescription }}
-      </p>
-      <div>
-        <li
-          v-for="invItem in inventory"
-          :key="invItem"
-          :type="invItem"
-          :title="invItem"
-        >
-          {{ invItem.houseItemId }} --- {{ invItem.quantity
-          }}{{ invItem.measure }}
+      <div v-if="hasItems">
+        <li>
+          <InventoryItemListItem
+            v-for="invItem in inventoryItemList"
+            :id="invItem.id"
+            :key="invItem.id"
+            :inventory-id="invItem.house_inventory_id"
+            :house-item-id="invItem.house_item_id"
+            :measure="invItem.measure_unit"
+            :price="invItem.price"
+            :quantity="invItem.quantity"
+            :order-submitted="inventorySubmitted"
+          />
         </li>
       </div>
+      <div v-else>Item not found!</div>
     </base-card>
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
-import { computed, defineProps } from 'vue'
-import { useRouter } from 'vue-router'
-import { useInventoriesStore } from '../../stores/inventories';
-
-/**
- * router
- */
-const router = useRouter()
+import InventoryItemListItem from "@/components/inventories/InventoryItemListItem.vue";
+import { computed, defineProps } from "vue";
+import { useRouter } from "vue-router";
+import { useInventoriesStore } from "@/stores/inventories";
 
 /**
  * store
  */
-const inventoryItems = useInventoriesStore()
+const inventoryItems = useInventoriesStore();
+
+/**
+ * router
+ */
+ const router = useRouter();
 
 /**
  * props
  */
-const props = defineProps ({
+const props = defineProps({
   inventoryId: {
     type: String,
-    required: true, 
-  }
-})
+    required: true,
+  },
+});
 
 /**
  * computed
  */
 const inventoryItem = computed(() => {
-   return inventoryItems.inventories.find((item) => item.id === props.inventoryId)
-})
+  return inventoryItems.inventories.find(
+    (item) => item.id === Number(props.inventoryId)
+  );
+});
 
 const inventoryDate = computed(() => {
-  return inventoryItem.value.date
-})
+  return inventoryItem.value?.date;
+});
 
 const inventorySubmitted = computed(() => {
-  return inventoryItem.value.submitted
-})
+  return inventoryItem.value?.submitted;
+});
 
-const inventory = computed(() => {
-  return inventoryItem.value.items
-})
+const hasItems = computed(() => {
+  if (inventoryItem.value) {
+    return true;
+  }
+  return false
+});
+
+const inventoryItemList = computed(() => {
+  return inventoryItem.value?.house_inventory_items;
+});
 
 /**
  * methods
  */
 const backToInventories = () => {
-      return router.go(-1);
-}
-
+  return router.go(-1);
+};
 </script>
 
 <style scoped>

@@ -10,14 +10,13 @@
   <router-view />
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
-import { defineProps } from 'vue';
+import { computed, defineProps } from 'vue';
 import { useVendorStore } from '../../../stores/vendors';
 import { useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia'
 /**
  * router
  */
@@ -26,9 +25,8 @@ const router = useRouter()
 /**
  * store
  */
-const { vendor } = storeToRefs(useVendorStore())
-const { fetchVendor } = useVendorStore()
-fetchVendor(props.vendorId)
+const { vendors, fetchVendors } = useVendorStore()
+fetchVendors()
 
 /**
  * props
@@ -43,13 +41,9 @@ const props = defineProps ({
 /**
  * computed
  */
-// const vendorItem = computed(() => {
-//   return vendor
-// })
-
-// const vendorName = computed(() => {
-//   return vendorItem.value.name
-// })
+const vendor = computed(() => {
+  return vendors.find((item) => item.id === Number(props.vendorId))!
+})
 
 const backToVendors = () => { 
   return router.go(-1)

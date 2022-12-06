@@ -1,6 +1,7 @@
 <template>
   <section>
     <base-card>
+      <h1>{{ vendorName }}</h1>
       <h2>{{ productName }}</h2>
       <h3>${{ productPrice }}</h3>
       <p>{{ productDescription }}</p>
@@ -14,13 +15,14 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
 import { defineProps, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVendorItemStore } from '../../../stores/vendor-items'
+import { useVendorStore } from "@/stores/vendors";
 
 /**
  * router
@@ -30,7 +32,12 @@ const router = useRouter()
 /**
  * store
  */
+
+const vendorStore = useVendorStore()
 const vendorProductItems = useVendorItemStore()
+const { fetchVendors } = useVendorStore()
+
+fetchVendors()
 
 /**
  * props
@@ -46,32 +53,38 @@ const props = defineProps ({
  * computed
  */
 const selectedItem = computed(() => {
-  return vendorProductItems.vendorItems.find( (item) => item.id === props.vendorItemId)
+  return vendorProductItems.vendorItems.find( (item) => item.id === Number(props.vendorItemId))
 })
 
 const productName = computed(() => {
-  return selectedItem.value.name
+  return selectedItem.value?.product_name
 })
 
 const productPrice = computed(() => {
-  return selectedItem.value.curPrice
+  return selectedItem.value?.latest_price
 })
 
 const productDescription = computed(() => {
-  return selectedItem.value.description
+  return selectedItem.value?.description
 })
 
 const itemPackSize = computed(() => {
-  return selectedItem.value.packSize
+  return selectedItem.value?.pack_size
 })
 
 const itemPackWeight = computed(() => {
-  return selectedItem.value.packWeight
+  return selectedItem.value?.measure_unit
 })
 
 const itemPackQuantity = computed(() => {
-  return selectedItem.value.packQuantity
+  return selectedItem.value?.pack_number
 })
+
+const vendorName = computed(() => {
+  return vendorStore.vendors.find((vendor) => vendor.id === selectedItem.value?.vendor_id)?.name;
+})
+
+
 
 /**
  * methods

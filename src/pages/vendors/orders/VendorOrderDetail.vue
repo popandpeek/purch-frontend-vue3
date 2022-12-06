@@ -4,85 +4,90 @@
       <h2>{{ vendorName }}</h2>
       <h3>{{ orderDate }}</h3>
       <div class="actions">
-        <base-button @click="backToOrderList">
-          Back
-        </base-button>
+        <base-button @click="backToOrderList"> Back </base-button>
       </div>
     </base-card>
     <base-card>
       <div v-if="orderItems">
-        <li
-          v-for="orderItem in orderItems"
-          :key="orderItem"
-          :type="orderItem"
-          :title="orderItem"
-        >
-          {{ orderItem.itemId }} - {{ orderItem.vendorItemId }} -
-          {{ orderItem.quantity }}{{ orderItem.measure }} - {{ orderItem.price
-          }}{{ orderItem.measure }} = ${{ orderItem.costExtended }}
+        <li>
+          <VendorOrderItemListItem
+            v-for="orderItem in orderItems"
+            :id="orderItem.id"
+            :key="orderItem.id"
+            :vendorItemId="orderItem.vendor_item_id"
+            :vendorOrderId="orderItem.vendor_order_id"
+            :quantity="orderItem.quantity"
+            :measure="orderItem.measure_unit"
+            :price="orderItem.price"
+          />
         </li>
       </div>
-      <h3 v-else>
-        No items on invoice!
-      </h3>
+      <h3 v-else>No items on invoice!</h3>
     </base-card>
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */
-import { defineProps, computed } from "vue"
-import { useVendorOrderStore } from "../../../stores/vendor-orders"
-import { useRouter } from "vue-router"
+import VendorOrderItemListItem from "@/components/vendors/vendor-orders/VendorOrderItemListItem.vue";
+import { defineProps, computed } from "vue";
+import { useVendorOrderStore } from "@/stores/vendor-orders";
+import { useVendorStore } from "@/stores/vendors";
+import { useRouter } from "vue-router";
 
 /**
  * store
  */
-const vendorOrders = useVendorOrderStore()
+const vendorOrders = useVendorOrderStore();
+const vendorStore = useVendorStore();
+const { fetchVendors } = useVendorStore();
+
+fetchVendors();
 
 /**
  * router
  */
-const router = useRouter()
+const router = useRouter();
 
 /**
  * props
  */
-const props = defineProps ({
+const props = defineProps({
   vendorOrderId: {
     type: String,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 /**
  * computed
  */
-const vendorOrderItems = computed(() => {
-  return vendorOrders.vendorOrders.find((order) => (order.id === props.vendorOrderId))
-})
-
-const vendorName = computed(() => {
-  return vendorOrderItems.value.vendorName
-})
+const vendorOrder = computed(() => {
+  return vendorOrders.vendorOrders.find(
+    (order) => order.id === Number(props.vendorOrderId)
+  );
+});
 
 const orderDate = computed(() => {
-  return vendorOrderItems.value.date
-})
+  return vendorOrder.value?.date;
+});
 
 const orderItems = computed(() => {
-  return vendorOrderItems.value.items
-})
+  return vendorOrder.value?.vendor_order_items;
+});
+
+const vendorName = computed(() => {
+  return vendorStore.vendors.find((vendor) => vendor.id === vendorOrder.value?.vendor_id)?.name;
+});
 
 /**
  * methods
  */
 const backToOrderList = () => {
-  return router.go(-1)
-}
-
+  return router.go(-1);
+};
 </script>
 
 <style scoped>

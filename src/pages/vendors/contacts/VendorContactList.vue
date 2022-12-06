@@ -1,5 +1,4 @@
 <template>
-  <sections>
     <base-card>
       <h1>VENDORS</h1>
       <div class="actions">
@@ -19,7 +18,7 @@
           :id="vendor.id"
           :key="vendor.id"
           :name="vendor.name"
-          :email="vendor.email"
+          :email="vendor.contact_email"
           :phone="vendor.phone"
         />
       </div>
@@ -27,10 +26,9 @@
         No Vendors
       </h3>
     </base-card>
-  </sections>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * imports
  */

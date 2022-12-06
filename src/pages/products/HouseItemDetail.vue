@@ -17,7 +17,7 @@
       </p>
       <div>
         <base-badge
-          v-for="vendor in vendors"
+          v-for="vendor in vendorList"
           :key="vendor"
           :type="vendor"
           :title="vendor"
@@ -29,16 +29,22 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
+import { storeToRefs } from 'pinia';
 import { computed, defineProps } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHouseItemsStore } from '../../stores/house-items';
+import { useHouseItemsStore } from '../../stores/house-items'
+import { useVendorStore } from '../../stores/vendors'
 
 /**
  * store
  */
 const itemsStore = useHouseItemsStore()
+const {fetchVendors} = useVendorStore()
+const {vendors} = storeToRefs(useVendorStore())
+
+fetchVendors()
 
 /*
   route
@@ -58,24 +64,35 @@ const props = defineProps ({
 /*
   computed
 */
-const selectedItem = computed(() => {
-  return itemsStore.items.find( (item) => item.id === props.houseItemId)
+const item = computed(() => {
+  return itemsStore.items.find( (item) => item.id === Number(props.houseItemId))
 })
 
 const productName = computed(() => {
-  return selectedItem.value.name
+  return item?.value?.name
 })
 
 const productPrice = computed(() => {
-  return selectedItem.value.lastPrice
+  return item?.value?.cur_price
 })
 
 const productDescription = computed(() => {
-  return selectedItem.value.productDescription
+  return item?.value?.description
 })
 
-const vendors = computed(() => {
-  return selectedItem.value.vendorList
+const vendorList = computed(() => {
+  let v_items: Array<import('@/api/model').VendorItem> = item?.value?.vendor_items!;
+  let vendor_ids: number[] = [];
+  v_items.forEach(element =>  {
+    vendor_ids.push(element.vendor_id);
+  });
+
+  let filteredVendors: Array<import('@/api/model').Vendor> = vendors.value.filter(function(item) {return vendor_ids.includes(item.id)})
+  let vendorNames: string[] = []
+  filteredVendors.forEach(element => {
+    vendorNames.push(element.name);
+  });
+  return vendorNames
 })
 
 /*
