@@ -18,11 +18,16 @@ import VendorItemList from "./pages/vendors/items/VendorItemList.vue";
 import VendorOrderDetail from "./pages/vendors/orders/VendorOrderDetail.vue";
 import VendorOrderList from "./pages/vendors/orders/VendorOrderList.vue";
 import NotFound from "./pages/NotFound.vue";
+import Login from '@/pages/Login.vue'
+import { useAuthStore } from '@/stores/auth';
 
-const router = createRouter({
+
+export const router = createRouter({
   history: createWebHistory(),
+  linkActiveClass: 'active',
   routes: [
     { path: "/", redirect: "/orders" },
+    { path: "/login", component: Login },
     { path: "/items", component: HouseItemList },
     { path: "/items/:houseItemId", component: HouseItemDetail, props: true },
     { path: "/items/registration", component: HouseItemRegistration },
@@ -87,4 +92,15 @@ const router = createRouter({
   ],
 });
 
-export default router;
+
+router.beforeEach(async (to) => {
+  // redirect to login page if not logged in and trying to access a restricted page
+  const publicPages = ['/login'];
+  const authRequired = !publicPages.includes(to.path);
+  const auth = useAuthStore();
+
+  if (authRequired && !auth.token) {
+      auth.returnUrl = to.fullPath;
+      return '/login';
+  }
+});

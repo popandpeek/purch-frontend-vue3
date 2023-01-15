@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import axios from "../http-common";
+import instance from "../http-common";
 import { Inventory, HouseInventoryUpdateItem } from "@/api/model";
 
 export const useInventoriesStore = defineStore({ 
@@ -17,7 +17,12 @@ export const useInventoriesStore = defineStore({
   },
   actions: { 
     async fetchInventories() {
-      const response = await axios.get('/inventory/');
+      const response = await instance.get('/inventory/', {
+        headers: {
+          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
+          "Content-Type": "application/json",
+        },
+      });
       this.inventories = response.data;
     },
     async setQuantity(payload: HouseInventoryUpdateItem) {
@@ -36,14 +41,17 @@ export const useInventoriesStore = defineStore({
         
         const request_options = {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("token")!),
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             price: item.price,
             measure_unit: item.measure_unit,
             quantity: item.quantity
           })
         };
-        fetch("http://0.0.0.0:8007/inventory/inventory_item/" + item.id, request_options)
+        fetch("http://0.0.0.0:8005/inventory/inventory_item/" + item.id, request_options)
           .then(response => console.log(response));
       }
     },

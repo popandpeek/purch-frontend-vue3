@@ -1,3 +1,9 @@
+export interface User {
+    username: null | string,
+    password: null | string,
+    token: null | string
+}
+
 export interface HouseItem {
     id: number,
     item_class_id: number,

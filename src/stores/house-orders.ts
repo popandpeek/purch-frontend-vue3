@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
-import axios from "../http-common";
+import instance from "@/http-common";
 import { HouseOrder, HouseOrderUpdateItem } from "@/api/model";
+
 
 export const useHouseOrderStore = defineStore({
   id: "houseOrdersStore",
@@ -17,7 +18,12 @@ export const useHouseOrderStore = defineStore({
   },
   actions: {
     async fetchOrderItems() {
-      const response = await axios.get("/house_orders/");
+      const response = await instance.get("/house_orders/", {
+        headers: {
+          "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("token")!),
+          "Content-Type": "application/json",
+        },
+      });
       this.orders = response.data;
     },
     async setQuantity(payload: HouseOrderUpdateItem) {
@@ -29,31 +35,38 @@ export const useHouseOrderStore = defineStore({
 
       //  Third: get HouseOrderItem from list of HouseOrderItem's
       const item = items?.find((y) => y.id === payload.order_item_id);
-      
+
       //  Fourth: send changes to DB
       if (item != null) {
         item.quantity = payload.updated_quantity;
-        
-      //  ** TODO: Axios does not send as json? ** 
-      //   const res = await axios
-      //     .put("/house_orders/active_order/1", { item })
-      //     .catch((error) => {
-      //       console.error("There was an error!", error);
-      //       console.log(res?.data.headers["Content-Type"]);
-      //     });
-      // } else {
-      //   console.log("Item to update not found!");
+
+        //  ** TODO: Axios does not send as json? **
+        //   const res = await instance
+        //     .put("/house_orders/active_order/1", { item })
+        //     .catch((error) => {
+        //       console.error("There was an error!", error);
+        //       console.log(res?.data.headers["Content-Type"]);
+        //     });
+        // } else {
+        //   console.log("Item to update not found!");
+        const access_token = JSON.parse(localStorage.getItem("token")!);
+        console.log(access_token);
         const request_options = {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Authorization": access_token,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             price: item.price,
             measure_unit: item.measure_unit,
-            quantity: item.quantity
-          })
+            quantity: item.quantity,
+          }),
         };
-        fetch("http://0.0.0.0:8007/house_orders/active_order/" + item.id, request_options)
-          .then(response => console.log(response));
+        fetch(
+          "http://0.0.0.0:8005/house_orders/active_order/" + item.id,
+          request_options
+        ).then((response) => console.log(response));
       }
     },
   },

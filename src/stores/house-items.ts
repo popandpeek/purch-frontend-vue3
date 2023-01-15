@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
-import json from "../../public/data/house-item-data.json"
+import json from "../../public/data/house-item-data.json";
 import { HouseItem } from "@/api/model";
-import axios from "../http-common";
+import instance from "../http-common";
 
 export const useHouseItemsStore = defineStore({
   id: "houseItemsStore",
   state: () => ({
-    items: [] as HouseItem[]
+    items: [] as HouseItem[],
   }),
   getters: {
     getItems: (state) => {
@@ -18,8 +18,13 @@ export const useHouseItemsStore = defineStore({
   },
   actions: {
     async fetchHouseItems() {
-      const response = await axios.get('/house_items');
+      const response = await instance.get("/house_items/", {
+        headers: {
+          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
+          "Content-Type": "application/json",
+        },
+      });
       this.items = response.data;
-    }
-  }
+    },
+  },
 });

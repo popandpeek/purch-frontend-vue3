@@ -13,13 +13,11 @@
     "core-js": "^3.6.5",
     "pinia": "^2.0.22",
     "qs": "^6.11.0",
-    "vee-validate": "^4.7.0",
     "vue": "^3.2.26",
     "vue-axios": "^3.5.1",
     "vue-class-component": "^8.0.0-0",
     "vue-query": "^1.26.0",
     "vue-router": "^4.0.12",
-    "vuex": "^4.0.2",
     "zod": "^3.19.1"
   },
   "devDependencies": {

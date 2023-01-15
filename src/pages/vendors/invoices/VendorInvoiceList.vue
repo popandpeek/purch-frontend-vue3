@@ -12,6 +12,7 @@
         Add Invoice
       </base-button>
     </div>
+    
     <div v-if="vendor_invoices">
       <VendorInvoiceItem
         v-for="invoice in invoices"

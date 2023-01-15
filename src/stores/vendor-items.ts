@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import json from "../../public/data/vendor-item-data.json"
 import { VendorItem } from "@/api/model";
-import axios from "../http-common";
+import instance from "../http-common";
 
 export const useVendorItemStore = defineStore({ 
   id: "vendorItemsStore",
@@ -18,7 +18,12 @@ export const useVendorItemStore = defineStore({
   },
   actions: {
     async fetchAllVendorItems() {
-      const response = await axios.get('/vendor_items')
+      const response = await instance.get('/vendor_items/', {
+        headers: {
+          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
+          "Content-Type": "application/json",
+        },
+      })
       this.vendorItems = response.data
     }
   },
