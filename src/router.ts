@@ -98,8 +98,20 @@ router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
   
   // Initialize Firebase auth state listener if not already done
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isInitialized) {
     authStore.initializeAuth();
+    
+    // Wait for auth state to be determined
+    await new Promise(resolve => {
+      const checkInitialized = () => {
+        if (authStore.isInitialized) {
+          resolve(void 0);
+        } else {
+          setTimeout(checkInitialized, 50);
+        }
+      };
+      checkInitialized();
+    });
   }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

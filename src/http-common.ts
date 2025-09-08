@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from '@/stores/auth';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: (import.meta as any).env.VITE_API_URL || 'http://localhost:8085',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,10 +12,12 @@ const instance = axios.create({
 instance.interceptors.request.use(
   async (config) => {
     const authStore = useAuthStore();
-    if (authStore.firebaseUser) {
+    if (authStore.isAuthenticated) {
       try {
-        const token = await authStore.firebaseUser.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
+        const token = await authStore.getCurrentToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       } catch (error) {
         console.error('Error getting Firebase token:', error);
         authStore.logout();

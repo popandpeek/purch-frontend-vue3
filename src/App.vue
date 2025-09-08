@@ -12,14 +12,17 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
 
 html, body {
   font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 #app {
   font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
 }
 </style>

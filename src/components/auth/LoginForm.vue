@@ -8,7 +8,7 @@
           v-model="form.email"
           label="Email"
           type="email"
-          :rules="[val => !!val || 'Email is required', val => isValidEmail(val) || 'Invalid email']"
+          :rules="[(val: string) => !!val || 'Email is required', (val: string) => isValidEmail(val) || 'Invalid email']"
           outlined
         />
         
@@ -16,7 +16,7 @@
           v-model="form.password"
           label="Password"
           type="password"
-          :rules="[val => !!val || 'Password is required']"
+          :rules="[(val: string) => !!val || 'Password is required']"
           outlined
         />
         

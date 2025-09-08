@@ -9,6 +9,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: false,
     loading: false,
     error: null as string | null,
+    isInitialized: false, // Track if auth state has been initialized
   }),
 
   getters: {
@@ -24,9 +25,9 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const firebaseUser = await authService.login(credentials);
-        this.firebaseUser = firebaseUser;
-        this.user = authService.convertFirebaseUser(firebaseUser);
-        this.isAuthenticated = true;
+        // The auth state change listener will handle updating the store
+        // We just need to wait for it to complete
+        await this.waitForAuthStateUpdate();
         
         return { user: this.user, firebaseUser };
       } catch (error: any) {
@@ -43,9 +44,8 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const firebaseUser = await authService.register(userData);
-        this.firebaseUser = firebaseUser;
-        this.user = authService.convertFirebaseUser(firebaseUser);
-        this.isAuthenticated = true;
+        // The auth state change listener will handle updating the store
+        await this.waitForAuthStateUpdate();
         
         return { user: this.user, firebaseUser };
       } catch (error: any) {
@@ -62,9 +62,8 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const firebaseUser = await authService.signInWithGoogle();
-        this.firebaseUser = firebaseUser;
-        this.user = authService.convertFirebaseUser(firebaseUser);
-        this.isAuthenticated = true;
+        // The auth state change listener will handle updating the store
+        await this.waitForAuthStateUpdate();
         
         return { user: this.user, firebaseUser };
       } catch (error: any) {
@@ -104,17 +103,103 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // Helper method to wait for auth state update
+    waitForAuthStateUpdate(): Promise<void> {
+      return new Promise((resolve) => {
+        const checkAuthState = () => {
+          if (this.isAuthenticated) {
+            resolve();
+          } else {
+            setTimeout(checkAuthState, 50);
+          }
+        };
+        checkAuthState();
+      });
+    },
+
+    // Check if current token is valid and refresh if needed
+    async checkTokenValidity(): Promise<boolean> {
+      if (!this.firebaseUser) {
+        return false;
+      }
+
+      try {
+        // Force refresh the token to check if it's still valid
+        const token = await this.firebaseUser.getIdToken(true);
+        return !!token;
+      } catch (error) {
+        console.error('Token validation failed:', error);
+        this.logout();
+        return false;
+      }
+    },
+
+    // Set up automatic token refresh
+    setupTokenRefresh() {
+      if (!this.firebaseUser) return;
+
+      // Refresh token every 50 minutes (tokens expire after 1 hour)
+      setInterval(async () => {
+        if (this.firebaseUser) {
+          const isValid = await this.checkTokenValidity();
+          if (!isValid) {
+            console.log('Token expired, logging out user');
+            this.logout();
+          }
+        }
+      }, 50 * 60 * 1000); // 50 minutes
+    },
+
+    // Get current Firebase token (with automatic refresh)
+    async getCurrentToken(): Promise<string | null> {
+      if (!this.firebaseUser) {
+        return null;
+      }
+
+      try {
+        return await this.firebaseUser.getIdToken();
+      } catch (error) {
+        console.error('Failed to get token:', error);
+        this.logout();
+        return null;
+      }
+    },
+
     // Initialize auth state listener
     initializeAuth() {
-      authService.onAuthStateChanged((firebaseUser) => {
+      if (this.isInitialized) {
+        return; // Already initialized
+      }
+
+      this.isInitialized = true;
+      
+      authService.onAuthStateChanged(async (firebaseUser) => {
         if (firebaseUser) {
-          this.firebaseUser = firebaseUser;
-          this.user = authService.convertFirebaseUser(firebaseUser);
-          this.isAuthenticated = true;
+          // Check if the token is still valid
+          try {
+            const token = await firebaseUser.getIdToken();
+            if (token) {
+              this.firebaseUser = firebaseUser;
+              this.user = authService.convertFirebaseUser(firebaseUser);
+              this.isAuthenticated = true;
+              this.error = null;
+              
+              // Set up automatic token refresh
+              this.setupTokenRefresh();
+            } else {
+              // Token is invalid, log out
+              this.logout();
+            }
+          } catch (error) {
+            console.error('Token validation failed:', error);
+            this.logout();
+          }
         } else {
+          // No user, clear state
           this.user = null;
           this.firebaseUser = null;
           this.isAuthenticated = false;
+          this.error = null;
         }
       });
     },
