@@ -1,7 +1,29 @@
+// Update User interface to work with Firebase
 export interface User {
-    username: null | string,
-    password: null | string,
-    token: null | string
+  id: string; // Firebase UID
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+// Add authentication interfaces
+export interface UserLogin {
+  email: string;
+  password: string;
+}
+
+export interface UserRegister {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
 }
 
 export interface HouseItem {

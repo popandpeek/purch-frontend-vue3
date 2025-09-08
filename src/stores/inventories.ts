@@ -51,7 +51,7 @@ export const useInventoriesStore = defineStore({
             quantity: item.quantity
           })
         };
-        fetch("http://0.0.0.0:8005/inventory/inventory_item/" + item.id, request_options)
+        fetch("http://0.0.0.0:8085/inventory/inventory_item/" + item.id, request_options)
           .then(response => console.log(response));
       }
     },

@@ -1,0 +1,11 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyCM7wer3S87OKzZx_tOxNQILBb1XJ6fsvU",
+  authDomain: "purch-b5e4b.firebaseapp.com",
+  projectId: "purch-b5e4b",
+  storageBucket: "purch-b5e4b.firebasestorage.app",
+  messagingSenderId: "554502908624",
+  appId: "1:554502908624:web:4346e28647de29ecafccd5",
+  measurementId: "G-V31YWZYZMY"
+};
+
+export default firebase_config;

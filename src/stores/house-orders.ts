@@ -64,7 +64,7 @@ export const useHouseOrderStore = defineStore({
           }),
         };
         fetch(
-          "http://0.0.0.0:8005/house_orders/active_order/" + item.id,
+          "http://0.0.0.0:8085/house_orders/active_order/" + item.id,
           request_options
         ).then((response) => console.log(response));
       }

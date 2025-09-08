@@ -7,11 +7,18 @@ import BaseCard from './components/ui/BaseCard.vue';
 import BaseButton from './components/ui/BaseButton.vue';
 import BaseBadge from './components/ui/BaseBadge.vue';
 import BaseInputListItem from './components/ui/BaseInputListItem.vue'
+import { Quasar } from 'quasar'
+import quasarUserOptions from './quasar-user-options'
+import { useAuthStore } from '@/stores/auth';
 
-
-const app = createApp(App);
-app.use(createPinia());
+const app = createApp(App).use(Quasar, quasarUserOptions);
+const pinia = createPinia();
+app.use(pinia);
 app.use(router);
+
+// Initialize auth store
+const authStore = useAuthStore();
+authStore.initializeAuth();
 
 app.component('BaseCard', BaseCard);
 app.component('BaseButton', BaseButton);

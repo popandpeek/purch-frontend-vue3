@@ -18,7 +18,7 @@ import VendorItemList from "./pages/vendors/items/VendorItemList.vue";
 import VendorOrderDetail from "./pages/vendors/orders/VendorOrderDetail.vue";
 import VendorOrderList from "./pages/vendors/orders/VendorOrderList.vue";
 import NotFound from "./pages/NotFound.vue";
-import Login from '@/pages/Login.vue'
+import Auth from '@/pages/Auth.vue';
 import { useAuthStore } from '@/stores/auth';
 
 
@@ -27,13 +27,14 @@ export const router = createRouter({
   linkActiveClass: 'active',
   routes: [
     { path: "/", redirect: "/orders" },
-    { path: "/login", component: Login },
-    { path: "/items", component: HouseItemList },
-    { path: "/items/:houseItemId", component: HouseItemDetail, props: true },
-    { path: "/items/registration", component: HouseItemRegistration },
-    { path: "/orders", component: HouseOrderList },
-    { path: "/orders/:houseOrderId", component: HouseOrderDetail, props: true },
-    { path: "/inventories", component: InventoryList },
+    { path: "/auth", component: Auth, meta: { requiresGuest: true } },
+    { path: "/login", redirect: "/auth" },
+    { path: "/items", component: HouseItemList, meta: { requiresAuth: true } },
+    { path: "/items/:houseItemId", component: HouseItemDetail, props: true, meta: { requiresAuth: true } },
+    { path: "/items/registration", component: HouseItemRegistration, meta: { requiresAuth: true } },
+    { path: "/orders", component: HouseOrderList, meta: { requiresAuth: true } },
+    { path: "/orders/:houseOrderId", component: HouseOrderDetail, props: true, meta: { requiresAuth: true } },
+    { path: "/inventories", component: InventoryList, meta: { requiresAuth: true } },
     {
       path: "/inventories/:inventoryId",
       component: InventoryDetail,
@@ -93,14 +94,19 @@ export const router = createRouter({
 });
 
 
-router.beforeEach(async (to) => {
-  // redirect to login page if not logged in and trying to access a restricted page
-  const publicPages = ['/login'];
-  const authRequired = !publicPages.includes(to.path);
-  const auth = useAuthStore();
-
-  if (authRequired && !auth.token) {
-      auth.returnUrl = to.fullPath;
-      return '/login';
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  
+  // Initialize Firebase auth state listener if not already done
+  if (!authStore.isAuthenticated) {
+    authStore.initializeAuth();
+  }
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next('/auth');
+  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    next('/');
+  } else {
+    next();
   }
 });
