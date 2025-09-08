@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
-import json from "../../public/data/house-item-data.json";
-import { HouseItem } from "@/api/model";
+import type { HouseItem } from "@/api/model";
 import instance from "../http-common";
 
 export const useHouseItemsStore = defineStore({

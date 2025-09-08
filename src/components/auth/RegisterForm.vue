@@ -79,6 +79,11 @@ import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import type { UserRegister } from '@/api/model';
 
+const emit = defineEmits<{
+  'register-success': []
+  'switch-to-login': []
+}>();
+
 const authStore = useAuthStore();
 
 const form = ref<UserRegister & { confirmPassword: string }>({
@@ -113,9 +118,4 @@ const handleGoogleSignIn = async () => {
     // Error is handled in the store
   }
 };
-
-defineEmits<{
-  'switch-to-login': [];
-  'register-success': [];
-}>();
 </script>

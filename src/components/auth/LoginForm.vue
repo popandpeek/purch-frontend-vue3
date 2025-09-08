@@ -64,6 +64,12 @@ import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import type { UserLogin } from '@/api/model';
 
+const emit = defineEmits<{
+  'login-success': []
+  'switch-to-register': []
+  'forgot-password': []
+}>();
+
 const authStore = useAuthStore();
 
 const form = ref<UserLogin>({
@@ -94,10 +100,4 @@ const handleGoogleSignIn = async () => {
     // Error is handled in the store
   }
 };
-
-defineEmits<{
-  'switch-to-register': [];
-  'login-success': [];
-  'forgot-password': [];
-}>();
 </script>

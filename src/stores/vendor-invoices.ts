@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { VendorInvoice } from "@/api/model";
+import type { VendorInvoice } from "@/api/model";
 import instance from "../http-common";
 
 export const useInvoiceStore = defineStore({

@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
-import json from "../../public/data/vendor-order-data.json"
-import { VendorOrder } from "@/api/model";
+import type { VendorOrder } from "@/api/model";
 import instance from "../http-common";
 
 export const useVendorOrderStore = defineStore({ 

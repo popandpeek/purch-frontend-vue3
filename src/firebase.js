@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import firebase_config from './config-secure'
+import firebase_config from './config.secure'
 
 // Firebase project configuration
 const firebaseConfig = {

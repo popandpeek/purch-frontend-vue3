@@ -94,7 +94,7 @@ export const router = createRouter({
 });
 
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
   
   // Initialize Firebase auth state listener if not already done

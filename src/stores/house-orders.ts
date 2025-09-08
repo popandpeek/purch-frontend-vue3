@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import instance from "@/http-common";
-import { HouseOrder, HouseOrderUpdateItem } from "@/api/model";
+import type { HouseOrder, HouseOrderUpdateItem } from "@/api/model";
 
 
 export const useHouseOrderStore = defineStore({

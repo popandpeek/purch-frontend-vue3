@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import instance from "../http-common";
-import { Inventory, HouseInventoryUpdateItem } from "@/api/model";
+import type { Inventory, HouseInventoryUpdateItem } from "@/api/model";
 
 export const useInventoriesStore = defineStore({ 
   id: 'inventoriesStore',

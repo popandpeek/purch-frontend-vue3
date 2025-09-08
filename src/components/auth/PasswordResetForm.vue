@@ -37,6 +37,11 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
+const emit = defineEmits<{
+  'reset-sent': []
+  'back-to-login': []
+}>();
+
 const authStore = useAuthStore();
 const email = ref('');
 
@@ -54,9 +59,4 @@ const handleResetPassword = async () => {
     // Error is handled in the store
   }
 };
-
-defineEmits<{
-  'back-to-login': [];
-  'reset-sent': [];
-}>();
 </script>

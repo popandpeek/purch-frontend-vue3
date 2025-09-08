@@ -1,8 +1,8 @@
 <template>
   <form @submit.prevent="onSubmit">
     <div class="form-group my-2">
-      <label>Username</label>
-      <input v-model="form.username" class="form-control" type="text" placeholder="email@address.com" required />
+      <label>Email</label>
+      <input v-model="form.email" class="form-control" type="email" placeholder="email@address.com" required />
     </div>
     <div class="form-group my-2">
       <label>Password</label>
@@ -21,13 +21,13 @@ import { reactive } from '@vue/reactivity';
 const authStore = useAuthStore()
 
 const form = reactive({
-  username: '',
+  email: '',
   password: ''
 })
 
 function onSubmit() {
-  authStore.login(form.username, form.password);
-  form.username = ''
+  authStore.login({ email: form.email, password: form.password });
+  form.email = ''
   form.password = ''
 }
 </script>
