@@ -17,22 +17,18 @@ export const useVendorOrderStore = defineStore({
   },
   actions: {
     async fetchVendorOrders() {
-      const response = await instance.get('/vendor_orders/', {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      })
-      this.vendorOrders = response.data
+      const response = await instance.get('/vendor-orders/');
+      console.log('🔍 Vendor orders response:', response.data);
+      if (response.data && response.data.length > 0) {
+        console.log('🔍 First order structure:', response.data[0]);
+        console.log('🔍 First order keys:', Object.keys(response.data[0]));
+        console.log('🔍 First order values:', Object.values(response.data[0]));
+      }
+      this.vendorOrders = response.data;
     },
     async fetchVendorOrdersPerVendor(vendorId: number) {
-      const response = await instance.get('/vendor_orders/' + vendorId, {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      })
-      this.vendorOrders = response.data
+      const response = await instance.get('/vendor-orders/' + vendorId);
+      this.vendorOrders = response.data;
     }
   },
 });

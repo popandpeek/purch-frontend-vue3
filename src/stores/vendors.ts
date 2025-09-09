@@ -19,30 +19,16 @@ export const useVendorStore = defineStore({
   },
   actions: {
     async fetchVendors() {
-      const response = await instance.get("/vendors/", {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await instance.get("/vendors/");
       this.vendors = response.data;
     },
     async fetchVendor(vendorId: string) {
-      const response = await instance.get("/vendors/" + Number(vendorId), {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await instance.get("/vendors/" + Number(vendorId));
       this.vendor = response.data;
     },
     async fetchVendorsList(vendor_ids: Array<number>) {
       const response = await instance.get("/vendors/list", {
         params: { vendor_ids },
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
       });
       this.vendorList = response.data;
     },

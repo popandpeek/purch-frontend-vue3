@@ -17,8 +17,8 @@
             :vendorItemId="orderItem.vendor_item_id"
             :vendorOrderId="orderItem.vendor_order_id"
             :quantity="orderItem.quantity"
-            :measure="orderItem.measure_unit"
-            :price="orderItem.price"
+            :measure="orderItem.vendor_item_name"
+            :price="orderItem.unit_price"
           />
         </li>
       </div>
@@ -75,7 +75,9 @@ const orderDate = computed(() => {
 });
 
 const orderItems = computed(() => {
-  return vendorOrder.value?.vendor_order_items;
+  console.log('🔍 Vendor order:', vendorOrder.value);
+  console.log('🔍 Order items:', vendorOrder.value?.items);
+  return vendorOrder.value?.items;
 });
 
 const vendorName = computed(() => {

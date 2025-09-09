@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import firebase_config from './config.secure'
 
 // Firebase project configuration
@@ -15,6 +15,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Set persistence to LOCAL to ensure auth state persists across page refreshes
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log('✅ Firebase auth persistence set to LOCAL');
+  })
+  .catch((error) => {
+    console.error('❌ Error setting Firebase auth persistence:', error);
+  });
 
 export { auth };
 export default app;

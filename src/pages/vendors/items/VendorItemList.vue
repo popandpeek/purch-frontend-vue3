@@ -8,7 +8,7 @@
         :key="item.id"
         :name="item.product_name"
         :price="item.latest_price"
-        :measure-unit="item.measure_unit"
+        :measure-unit="item.unit"
         :pack-size="item.pack_size"
         :pack-number="item.pack_number"
       />

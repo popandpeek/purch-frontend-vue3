@@ -28,18 +28,16 @@ export interface UserRegister {
 
 export interface HouseItem {
     id: number,
-    item_class_id: number,
     name: string,
-    description: string,
     active: boolean,
-    measure_unit: string,
-    cur_price: string,
+    tracking_unit: string,
+    current_price_per_unit: string,
+    current_count: number,
+    par_level: number,
+    inventory_category: string,
+    storage_location: string,
     default_vendor_item_id: null | number,
-    item_class: null | Array<ItemClass>,
-    house_order_items: null | Array<HouseOrderItem>,
-    house_inventory_items: null | Array<InventoryItem>,
-    vendor_items: null | Array<VendorItem>,
-    storage_locations: null | Array<string>
+    vendor_items: null | Array<VendorItem>
 }
 
 export interface ItemClass {
@@ -61,7 +59,15 @@ export interface HouseOrder {
     date: string,
     submitted: boolean,
     house_order_items: null | Array<HouseOrderItem>,
-    user_id: null | number
+    user_id: null | number,
+    // Additional fields from vendor orders
+    vendor_id?: number,
+    status?: string,
+    total_amount?: string,
+    notes?: string,
+    created_at?: string,
+    updated_at?: string,
+    items?: Array<any>
 }
 
 export interface HouseOrderItem {
@@ -69,7 +75,8 @@ export interface HouseOrderItem {
     house_item_id: number,
     house_order_id: number,
     quantity: string,
-    measure_unit: string,
+    measure: string,
+    unit: string,
     price: string
 }
 
@@ -98,7 +105,8 @@ export interface InventoryItem {
     house_inventory_id: number,
     date: string,
     quantity: string,
-    measure_unit: string,
+    measure: string,
+    unit: string,
     price: string
 }
 
@@ -136,7 +144,8 @@ export interface VendorOrderItem {
     vendor_invoice_id: number,
     price: string,
     quantity: string,
-    measure_unit: string,
+    measure: string,
+    unit: string,
 }
 
 export interface VendorItem {
@@ -149,7 +158,8 @@ export interface VendorItem {
     product_name: string,
     description: string,
     latest_price: string,
-    measure_unit: string,
+    measure: string,
+    unit: string,
     pack_size: number,
     pack_number: number,
     brand_name: string,
@@ -172,7 +182,8 @@ export interface VendorInvoiceItem {
     vendor_invoice_id: number,
     vendor_order_item_id: number,
     vendor_item_id: number,
-    measure_unit: string,
+    measure: string,
+    unit: string,
     pack_size: string,
     pack_number: string,
     price: string,

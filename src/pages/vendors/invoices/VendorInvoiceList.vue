@@ -18,9 +18,9 @@
         v-for="invoice in invoices"
         :id="invoice.id"
         :key="invoice.id"
-        :doc-id="invoice.invoice_doc_id"
-        :date="invoice.date"
-        :status="invoice.paid"
+        :doc-id="invoice.invoice_number"
+        :date="invoice.invoice_date"
+        :status="invoice.status"
       />
     </div>
     <h3 v-else>
@@ -61,7 +61,13 @@ const props = defineProps ({
  * computed
  */
 const invoices = computed(() => {
-  return invoiceStore.vendor_invoices.filter(function(obj) {return obj.vendor_id === Number(props.vendorId)})
+  const filtered = invoiceStore.vendor_invoices.filter(function(obj) {return obj.vendor_id === Number(props.vendorId)})
+  console.log('🔍 Filtered invoices for vendor', props.vendorId, ':', filtered)
+  if (filtered.length > 0) {
+    console.log('🔍 First filtered invoice:', filtered[0])
+    console.log('🔍 Invoice fields:', Object.keys(filtered[0]))
+  }
+  return filtered
 })
 const invoiceRegistration = computed(() => {
   return '/vendors/invoiceRegistration'

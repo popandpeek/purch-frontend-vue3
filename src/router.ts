@@ -97,28 +97,41 @@ export const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
   
-  // Initialize Firebase auth state listener if not already done
-  if (!authStore.isInitialized) {
-    authStore.initializeAuth();
-    
-    // Wait for auth state to be determined
-    await new Promise(resolve => {
-      const checkInitialized = () => {
-        if (authStore.isInitialized) {
-          resolve(void 0);
-        } else {
-          setTimeout(checkInitialized, 50);
-        }
-      };
-      checkInitialized();
-    });
+  // If route doesn't require auth, allow navigation
+  if (!to.meta.requiresAuth && !to.meta.requiresGuest) {
+    console.log('🔐 Router: Public route, allowing navigation to:', to.path);
+    next();
+    return;
   }
   
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/auth');
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/');
-  } else {
-    next();
+  // Initialize auth store if not already done
+  if (!authStore.isInitialized) {
+    console.log('🔐 Router: Initializing auth store...');
+    await authStore.initializeAuth();
   }
+  
+  // Wait for Firebase auth state to be determined
+  return new Promise((resolve) => {
+    let unsubscribe: (() => void) | null = null;
+    
+    unsubscribe = authStore.waitForAuthStateChange((isAuthenticated) => {
+      if (unsubscribe) {
+        unsubscribe(); // Unsubscribe to prevent multiple calls
+      }
+      
+      console.log('🔐 Router: Auth state determined, isAuthenticated:', isAuthenticated);
+      
+      if (to.meta.requiresAuth && !isAuthenticated) {
+        console.log('🔐 Router: Redirecting to auth page');
+        next('/auth');
+      } else if (to.meta.requiresGuest && isAuthenticated) {
+        console.log('🔐 Router: Redirecting to home page');
+        next('/');
+      } else {
+        console.log('🔐 Router: Allowing navigation to:', to.path);
+        next();
+      }
+      resolve(void 0);
+    });
+  });
 });

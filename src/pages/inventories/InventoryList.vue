@@ -1,7 +1,7 @@
 <template>
   <base-card>
     <h1>INVENTORIES</h1>
-    <div v-if="inventories">
+    <div v-if="inventories && inventories.length > 0">
       <InventoryItem
         v-for="inventory in inventories"
         :id="inventory.id"
@@ -22,13 +22,18 @@
 import InventoryItem from "../../components/inventories/InventoryItem.vue";
 import { useInventoriesStore } from '../../stores/inventories'
 import { storeToRefs } from "pinia";
+import { onMounted } from 'vue';
 
 /**
  * store  
 */
-const { inventories } = storeToRefs(useInventoriesStore())
-const { fetchInventories } = useInventoriesStore()
+const inventoriesStore = useInventoriesStore()
+const { inventories } = storeToRefs(inventoriesStore)
 
-fetchInventories()
+onMounted(async () => {
+  await inventoriesStore.fetchInventories()
+  console.log('🔍 Inventories after fetch:', inventories.value)
+  console.log('🔍 Inventories length:', inventories.value?.length)
+})
 
 </script>

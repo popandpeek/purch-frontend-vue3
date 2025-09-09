@@ -17,21 +17,17 @@ export const useInvoiceStore = defineStore({
   },
   actions: {
     async fetchAllVendorInvoices() {
-      const response = await instance.get("/invoices/", {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await instance.get("/vendor-invoices/");
+      console.log('🔍 Vendor invoices response:', response.data);
+      if (response.data && response.data.length > 0) {
+        console.log('🔍 First invoice structure:', response.data[0]);
+        console.log('🔍 First invoice keys:', Object.keys(response.data[0]));
+        console.log('🔍 First invoice values:', Object.values(response.data[0]));
+      }
       this.vendor_invoices = response.data;
     },
     async fetchVendorInvoicesPerVendor(vendorId: string) {
-      const response = await instance.get("/invoices/" + Number(vendorId), {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await instance.get("/vendor-invoices/" + Number(vendorId));
       this.vendor_invoices = response.data;
     },
   },

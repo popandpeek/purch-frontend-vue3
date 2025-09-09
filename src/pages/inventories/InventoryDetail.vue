@@ -20,8 +20,8 @@
             :key="invItem.id"
             :inventory-id="invItem.house_inventory_id"
             :house-item-id="invItem.house_item_id"
-            :measure="invItem.measure_unit"
-            :price="invItem.price"
+            :measure="invItem.house_item_unit"
+            :price="invItem.unit_cost"
             :quantity="invItem.quantity"
             :order-submitted="inventorySubmitted"
           />
@@ -86,7 +86,9 @@ const hasItems = computed(() => {
 });
 
 const inventoryItemList = computed(() => {
-  return inventoryItem.value?.house_inventory_items;
+  console.log('🔍 Inventory item:', inventoryItem.value);
+  console.log('🔍 Inventory items:', inventoryItem.value?.items);
+  return inventoryItem.value?.items;
 });
 
 /**

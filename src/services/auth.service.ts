@@ -13,6 +13,13 @@ import { auth } from '@/firebase.js';
 import type { User, UserLogin, UserRegister } from '@/api/model';
 
 export class AuthService {
+  constructor() {
+    // Ensure Firebase auth is available
+    if (!auth) {
+      throw new Error('Firebase auth is not initialized');
+    }
+  }
+
   // Email/Password Login
   async login(credentials: UserLogin): Promise<FirebaseUser> {
     const { email, password } = credentials;

@@ -17,12 +17,11 @@ export const useHouseItemsStore = defineStore({
   },
   actions: {
     async fetchHouseItems() {
-      const response = await instance.get("/house_items/", {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      // Check if this endpoint exists or needs to be updated
+      const response = await instance.get("/house-items/");
+      console.log('🔍 House items response:', response.data);
+      console.log('🔍 First house item:', response.data[0]);
+      console.log('🔍 First house item keys:', Object.keys(response.data[0]));
       this.items = response.data;
     },
   },

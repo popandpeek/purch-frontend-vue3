@@ -2,7 +2,7 @@
   <section>
     <base-card>
       <h2>{{ productName }}</h2>
-      <h3>${{ productPrice }}</h3>
+      <h3>${{ productPrice }} per {{ productUnit }}</h3>
       <div class="actions">
         <base-button @click="backToOrders">
           BACK
@@ -12,9 +12,18 @@
   </section>
   <section>
     <base-card>
-      <p>
-        {{ productDescription }}
-      </p>
+      <h3>Product Details</h3>
+      <p><strong>Description:</strong> {{ productDescription || 'No description available' }}</p>
+      <p><strong>Storage Location:</strong> {{ productStorageLocation || 'Not specified' }}</p>
+      <p><strong>Category:</strong> {{ productCategory || 'Not specified' }}</p>
+      <p><strong>Par Level:</strong> {{ productPar || 'Not set' }}</p>
+      <p><strong>Current Stock:</strong> {{ productHave || 'Not tracked' }}</p>
+      <p><strong>Active:</strong> {{ productActive ? 'Yes' : 'No' }}</p>
+    </base-card>
+  </section>
+  <section v-if="vendorList && vendorList.length > 0">
+    <base-card>
+      <h3>Available from Vendors</h3>
       <div>
         <base-badge
           v-for="vendor in vendorList"
@@ -73,11 +82,36 @@ const productName = computed(() => {
 })
 
 const productPrice = computed(() => {
-  return item?.value?.cur_price
+  return item?.value?.current_price_per_unit
+})
+
+const productUnit = computed(() => {
+  return item?.value?.tracking_unit
 })
 
 const productDescription = computed(() => {
   return item?.value?.description
+})
+
+const productStorageLocation = computed(() => {
+  return item?.value?.storage_location
+})
+
+const productCategory = computed(() => {
+  return item?.value?.inventory_category
+})
+
+const productPar = computed(() => {
+  return item?.value?.par_level
+})
+
+const productHave = computed(() => {
+  return item?.value?.current_count
+})
+
+
+const productActive = computed(() => {
+  return item?.value?.active
 })
 
 const vendorList = computed(() => {

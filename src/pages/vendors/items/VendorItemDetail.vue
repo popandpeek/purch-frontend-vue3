@@ -73,7 +73,7 @@ const itemPackSize = computed(() => {
 })
 
 const itemPackWeight = computed(() => {
-  return selectedItem.value?.measure_unit
+  return selectedItem.value?.unit
 })
 
 const itemPackQuantity = computed(() => {

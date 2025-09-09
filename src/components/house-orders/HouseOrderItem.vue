@@ -1,6 +1,12 @@
 <template>
   <base-input-list-item>
     <h3>{{ props.date }}</h3>
+    <div class="order-info">
+      <p><strong>Status:</strong> {{ props.status }}</p>
+      <p><strong>Total:</strong> ${{ props.totalAmount }}</p>
+      <p><strong>Vendor ID:</strong> {{ props.vendorId }}</p>
+      <p><strong>Items:</strong> {{ order?.items?.length || 0 }} items</p>
+    </div>
     <div class="actions">
       <base-button
         link
@@ -30,6 +36,26 @@ const props = defineProps ({
   date: {
     type: String,
     required: true
+  },
+  status: {
+    type: String,
+    required: false,
+    default: 'Unknown'
+  },
+  totalAmount: {
+    type: String,
+    required: false,
+    default: '0.00'
+  },
+  vendorId: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  order: {
+    type: Object,
+    required: false,
+    default: () => ({})
   }
 })
 

@@ -17,13 +17,8 @@ export const useVendorItemStore = defineStore({
   },
   actions: {
     async fetchAllVendorItems() {
-      const response = await instance.get('/vendor_items/', {
-        headers: {
-          Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      })
-      this.vendorItems = response.data
+      const response = await instance.get('/vendor-items/');
+      this.vendorItems = response.data;
     }
   },
 });

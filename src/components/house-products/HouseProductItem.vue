@@ -1,6 +1,7 @@
 <template>
   <base-input-list-item>
     <h3>{{ props.name }}</h3>
+    <p>Price: ${{ props.curPrice }} per {{ props.measure }}</p>
     <div class="actions">
       <base-button
         link
@@ -16,7 +17,7 @@
 /**
  * imports
  */
-import { computed, defineProps } from 'vue'
+import { computed, defineProps, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 
 /**
@@ -33,11 +34,32 @@ const props = defineProps ({
   },
   measure: {
     type: String,
-    required: true, 
+    required: false,
+    default: 'unit'
   },
   curPrice: {
     type: String,
     required: true, 
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  storageLocation: {
+    type: String,
+    required: false,
+  },
+  category: {
+    type: String,
+    required: false,
+  },
+  par: {
+    type: Number,
+    required: false,
+  },
+  have: {
+    type: Number,
+    required: false,
   }
 })
 
@@ -51,6 +73,18 @@ const route = useRoute()
  */
 const viewDetailsLink = computed(() => {
   return route.path + "/" + props.id
+})
+
+onMounted(() => {
+  console.log('🔍 HouseProductItem props:', props)
+  console.log('🔍 HouseProductItem name:', props.name)
+  console.log('🔍 HouseProductItem curPrice:', props.curPrice)
+  console.log('🔍 HouseProductItem measure:', props.measure)
+  console.log('🔍 HouseProductItem description:', props.description)
+  console.log('🔍 HouseProductItem storageLocation:', props.storageLocation)
+  console.log('🔍 HouseProductItem category:', props.category)
+  console.log('🔍 HouseProductItem par:', props.par)
+  console.log('🔍 HouseProductItem have:', props.have)
 })
 
 </script>

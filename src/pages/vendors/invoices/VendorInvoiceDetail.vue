@@ -19,8 +19,8 @@
           :key="invItem.id"
           :vendor-item-id="invItem.vendor_item_id"
           :quantity="invItem.quantity"
-          :measure="invItem.measure_unit"
-          :price="invItem.price"
+          :measure="invItem.vendor_item_name"
+          :price="invItem.unit_price"
         />
       </li>
     </div>
@@ -72,16 +72,16 @@ const invoiceItem = computed(() => {
 });
 
 const documentId = computed(() => {
-  return invoiceItem.value?.invoice_doc_id;
+  return invoiceItem.value?.invoice_number;
 });
 
 const invoiceDate = computed(() => {
-  return invoiceItem.value?.date;
+  return invoiceItem.value?.invoice_date;
 });
 
 const invoiceStatus = computed(() => {
-  const status = invoiceItem.value?.paid;
-  if (status) {
+  const status = invoiceItem.value?.status;
+  if (status === 'paid' || status === 'PAID') {
     return "PAID"
   } else {
     return "OUTSTANDING"
@@ -89,11 +89,13 @@ const invoiceStatus = computed(() => {
 });
 
 const invoiceItems = computed(() => {
-  return invoiceItem.value?.vendor_invoice_items;
+  console.log('🔍 Invoice item:', invoiceItem.value);
+  console.log('🔍 Invoice items:', invoiceItem.value?.items);
+  return invoiceItem.value?.items;
 });
 
 const hasInvoiceItems = computed(() => {
-  return invoiceItem.value?.vendor_invoice_items != null;
+  return invoiceItem.value?.items != null;
 });
 
 const vendorName = computed(() => {

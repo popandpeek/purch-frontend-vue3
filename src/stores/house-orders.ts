@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import instance from "@/http-common";
-import type { HouseOrder, HouseOrderUpdateItem } from "@/api/model";
+import type { HouseOrder, HouseOrderItem, HouseOrderUpdateItem } from "@/api/model";
 
 
 export const useHouseOrderStore = defineStore({
@@ -18,12 +18,8 @@ export const useHouseOrderStore = defineStore({
   },
   actions: {
     async fetchOrderItems() {
-      const response = await instance.get("/house_orders/", {
-        headers: {
-          "Authorization": 'Bearer ' + JSON.parse(localStorage.getItem("token")!),
-          "Content-Type": "application/json",
-        },
-      });
+      // Call the correct house-orders endpoint
+      const response = await instance.get("/house-orders/");
       this.orders = response.data;
     },
     async setQuantity(payload: HouseOrderUpdateItem) {
@@ -34,7 +30,7 @@ export const useHouseOrderStore = defineStore({
       const items = orderObj?.house_order_items;
 
       //  Third: get HouseOrderItem from list of HouseOrderItem's
-      const item = items?.find((y) => y.id === payload.order_item_id);
+      const item = items?.find((y: HouseOrderItem) => y.id === payload.order_item_id);
 
       //  Fourth: send changes to DB
       if (item != null) {
@@ -54,17 +50,18 @@ export const useHouseOrderStore = defineStore({
         const request_options = {
           method: "PUT",
           headers: {
-            "Authorization": access_token,
+            "Authorization": `Bearer ${access_token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             price: item.price,
-            measure_unit: item.measure_unit,
+            measure: item.measure,
+            unit: item.unit,
             quantity: item.quantity,
           }),
         };
         fetch(
-          "http://0.0.0.0:8085/house_orders/active_order/" + item.id,
+          `${instance.defaults.baseURL}/house-orders/active_order/` + item.id,
           request_options
         ).then((response) => console.log(response));
       }

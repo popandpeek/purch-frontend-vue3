@@ -19,8 +19,8 @@
           :key="item.id"
           :house-item-id="item.house_item_id"
           :quantity="item.quantity"
-          :measure="item.measure_unit"
-          :price="item.price"
+          :measure="item.vendor_item_name"
+          :price="item.unit_price"
           :order-id="item.house_order_id"
           :order-submitted="orderSubmitted"
         />
@@ -88,7 +88,7 @@ const hasItem = computed(() => {
 });
 
 const itemList = computed(() => {
-  return selectedItem.value?.house_order_items;
+  return selectedItem.value?.items;
 });
 
 /**

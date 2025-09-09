@@ -15,13 +15,19 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 
-// Initialize auth store
-const authStore = useAuthStore();
-authStore.initializeAuth();
-
 app.component('BaseCard', BaseCard);
 app.component('BaseButton', BaseButton);
 app.component('BaseBadge', BaseBadge);
 app.component('BaseInputListItem', BaseInputListItem);
 
 app.mount("#app");
+
+// Initialize auth store after app is mounted
+(async () => {
+  try {
+    const authStore = useAuthStore();
+    await authStore.initializeAuth();
+  } catch (error) {
+    console.error('Failed to initialize auth store:', error);
+  }
+})();
