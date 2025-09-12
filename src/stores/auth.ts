@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', {
     error: null as string | null,
     isInitialized: false, // Track if auth state has been initialized
     authListenerUnsubscribe: null as (() => void) | null, // Track auth listener unsubscribe function
+    tokenRefreshInterval: null as NodeJS.Timeout | null, // Track token refresh interval
   }),
 
   getters: {
@@ -101,6 +102,13 @@ export const useAuthStore = defineStore('auth', {
         this.firebaseUser = null;
         this.isAuthenticated = false;
         this.error = null;
+        
+        // Clear token refresh interval
+        if (this.tokenRefreshInterval) {
+          clearInterval(this.tokenRefreshInterval);
+          this.tokenRefreshInterval = null;
+        }
+        
         // Don't clean up the listener here as we want to keep listening for auth changes
       }
     },
@@ -155,7 +163,8 @@ export const useAuthStore = defineStore('auth', {
         return !!token;
       } catch (error) {
         console.error('Token validation failed:', error);
-        this.logout();
+        // Don't logout immediately - let the response interceptor handle 401s
+        console.warn('Token validation failed, returning false');
         return false;
       }
     },
@@ -164,29 +173,52 @@ export const useAuthStore = defineStore('auth', {
     setupTokenRefresh() {
       if (!this.firebaseUser) return;
 
-      // Refresh token every 50 minutes (tokens expire after 1 hour)
-      setInterval(async () => {
+      // Clear any existing interval
+      if (this.tokenRefreshInterval) {
+        clearInterval(this.tokenRefreshInterval);
+      }
+
+      // Refresh token every 55 minutes (tokens expire after 1 hour)
+      this.tokenRefreshInterval = setInterval(async () => {
         if (this.firebaseUser) {
-          const isValid = await this.checkTokenValidity();
-          if (!isValid) {
-            console.log('Token expired, logging out user');
-            this.logout();
+          try {
+            // Just get the token (Firebase will refresh if needed)
+            await this.firebaseUser.getIdToken();
+            console.log('✅ Token refreshed successfully');
+          } catch (error) {
+            console.error('Token refresh failed:', error);
+            // Don't logout immediately - let the response interceptor handle 401s
+            console.warn('Token refresh failed, will retry on next API call');
           }
         }
-      }, 50 * 60 * 1000); // 50 minutes
+      }, 55 * 60 * 1000); // 55 minutes
     },
 
     // Get current Firebase token (with automatic refresh)
     async getCurrentToken(): Promise<string | null> {
       if (!this.firebaseUser) {
+        console.log('No Firebase user available for token');
         return null;
       }
 
       try {
-        return await this.firebaseUser.getIdToken();
+        // Check if token needs refresh before expiration
+        const tokenResult = await this.firebaseUser.getIdTokenResult();
+        const expirationTime = new Date(tokenResult.expirationTime);
+        const currentTime = new Date();
+        const timeUntilExpiry = expirationTime.getTime() - currentTime.getTime();
+        
+        // If token expires in less than 5 minutes, refresh it
+        if (timeUntilExpiry < 5 * 60 * 1000) {
+          console.log('Token expires soon, refreshing...');
+          return await this.firebaseUser.getIdToken(true);
+        }
+        
+        return tokenResult.token;
       } catch (error) {
         console.error('Failed to get token:', error);
-        this.logout();
+        // Don't logout immediately - let the response interceptor handle 401s
+        console.warn('Token retrieval failed, returning null');
         return null;
       }
     },
@@ -203,7 +235,7 @@ export const useAuthStore = defineStore('auth', {
       
       // Check if authService is available
       if (!authService) {
-        console.error('❌ AuthService is not available');
+        console.error('AuthService is not available');
         return;
       }
       
@@ -212,28 +244,17 @@ export const useAuthStore = defineStore('auth', {
       // Set up the auth state listener first (only once)
       if (!this.authListenerUnsubscribe) {
         this.authListenerUnsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
-          console.log('🔄 Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
+          console.log('Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
           if (firebaseUser) {
-            // Check if the token is still valid
-            try {
-              const token = await firebaseUser.getIdToken();
-              if (token) {
-                console.log('✅ Valid token found, setting user state');
-                this.firebaseUser = firebaseUser;
-                this.user = authService.convertFirebaseUser(firebaseUser);
-                this.isAuthenticated = true;
-                this.error = null;
-                
-                // Set up automatic token refresh
-                this.setupTokenRefresh();
-              } else {
-                console.log('❌ Invalid token, logging out');
-                this.logout();
-              }
-            } catch (error) {
-              console.error('Token validation failed:', error);
-              this.logout();
-            }
+            // Set user state immediately - Firebase handles token validation
+            console.log('✅ User found, setting user state');
+            this.firebaseUser = firebaseUser;
+            this.user = authService.convertFirebaseUser(firebaseUser);
+            this.isAuthenticated = true;
+            this.error = null;
+            
+            // Set up automatic token refresh
+            this.setupTokenRefresh();
           } else {
             console.log('👤 No user, clearing state');
             // No user, clear state
@@ -245,12 +266,15 @@ export const useAuthStore = defineStore('auth', {
         });
       }
 
+      // Add a small delay to allow Firebase to restore the session
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Check if there's already a current user (for page refresh)
       // This will trigger the auth state change listener above
       const currentUser = authService.getCurrentUser();
-      console.log('🔍 Current user on initialization:', currentUser);
+      console.log('Current user on initialization:', currentUser);
       if (currentUser) {
-        console.log('🔄 Found existing user on initialization:', currentUser.uid);
+        console.log('Found existing user on initialization:', currentUser.uid);
         // The auth state change listener will handle setting the user state
         // We just need to wait for it to complete
         await this.waitForAuthStateUpdate();

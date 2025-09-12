@@ -29,16 +29,18 @@ export interface UserRegister {
 export interface HouseItem {
     id: number,
     name: string,
-    active: boolean,
-    tracking_unit: string,
-    current_price_per_unit: string,
-    current_count: number,
-    par_level: number,
-    inventory_category: string,
     storage_location: string,
-    default_vendor_item_id: null | number,
-    vendor_items: null | Array<VendorItem>
+    inventory_category: string,
+    tracking_unit: UnitType,
+    par_level: number,
+    current_count: number,
+    current_price_per_unit: string,
+    active: boolean,
+    default_vendor_item_id: number,
+    vendor_items: Array<VendorItem>
 }
+
+export type UnitType = 'each' | 'pound' | 'gallon' | 'dozen' | 'case' | 'box' | 'bag' | 'bottle';
 
 export interface ItemClass {
     id: number,
@@ -54,31 +56,6 @@ export interface StorageLocation {
     house_items: null | Array<HouseItem>
 }
 
-export interface HouseOrder {
-    id: number,
-    date: string,
-    submitted: boolean,
-    house_order_items: null | Array<HouseOrderItem>,
-    user_id: null | number,
-    // Additional fields from vendor orders
-    vendor_id?: number,
-    status?: string,
-    total_amount?: string,
-    notes?: string,
-    created_at?: string,
-    updated_at?: string,
-    items?: Array<any>
-}
-
-export interface HouseOrderItem {
-    id: number,
-    house_item_id: number,
-    house_order_id: number,
-    quantity: string,
-    measure: string,
-    unit: string,
-    price: string
-}
 
 export interface HouseOrderUpdateItem {
     order_id: number,
@@ -95,8 +72,12 @@ export interface HouseInventoryUpdateItem {
 export interface Inventory {
     id: number,
     date: string,
-    submitted: boolean,
-    house_inventory_items: Array<InventoryItem>
+    status: string,
+    total_value: string,
+    notes: string,
+    created_at: string,
+    updated_at: string,
+    items: Array<InventoryItem>
 }
 
 export interface InventoryItem {
@@ -113,28 +94,26 @@ export interface InventoryItem {
 export interface Vendor {
     id: number,
     name: string,
-    account_number: string,
-    address1: string,
-    address2: null | string,
-    address_city: string,
-    address_state: string,
-    address_zip: string,
-    contact_name_first: string,
-    contact_name_last: string,
+    contact_first_name: string,
+    contact_last_name: string,
     contact_email: string,
     phone: string,
-    email: string,
-    delivery_days: null | Array<string>,
-    delivery_times: null | Array<string>,
+    items: Array<VendorItem>
 }
 
 export interface VendorOrder {
-    id: number,
-    vendor_id: number,
-    date: string,
-    submitted: boolean,
-    vendor_invoice_id: null | number,
-    vendor_order_items: null | Array<VendorOrderItem>
+    id: number;
+    house_order_id: number | null; // Link to originating house order
+    vendor_id: number;
+    date: string;
+    status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+    total_amount: number;
+    notes: string;
+    submitted: boolean;
+    created_at: string;
+    updated_at: string;
+    items: Array<VendorOrderItem>;
+    vendor: Vendor; // Populated vendor details
 }
 
 export interface VendorOrderItem {
@@ -150,19 +129,32 @@ export interface VendorOrderItem {
 
 export interface VendorItem {
     id: number,
-    active: boolean,
     vendor_id: number,
     house_item_id: number,
-    vendor_item_id: number,
-    vendor_SKU: string,
+    vendor_product_id: string,
     product_name: string,
     description: string,
-    latest_price: string,
-    measure: string,
-    unit: string,
+    brand: string,
+    category: string,
+    sku: string,
+    case_size: number,
     pack_size: number,
-    pack_number: number,
-    brand_name: string,
+    pack_unit: string,
+    case_weight: string,
+    case_weight_unit: string,
+    price_per_case: string,
+    cost_price: string,
+    min_order_quantity: number,
+    max_order_quantity: number,
+    is_available: boolean,
+    is_active: boolean,
+    weight: string,
+    dimensions: string,
+    shelf_life_days: number,
+    storage_requirements: string,
+    vendor_name: string,
+    vendor_contact: string,
+    house_item_name: string,
     vendor_order_items: null | Array<VendorOrderItem>,
     vendor_invoice_items: null | Array<VendorInvoiceItem>
 }
@@ -170,22 +162,70 @@ export interface VendorItem {
 export interface VendorInvoice {
     id: number,
     vendor_id: number,
-    vendor_order_id: number,
-    date: string,
-    invoice_doc_id: string,
-    paid: boolean,
-    vendor_invoice_items: null | Array<VendorInvoiceItem>
+    invoice_number: string,
+    invoice_date: string,
+    due_date: string,
+    subtotal: string,
+    tax_amount: string,
+    total_amount: string,
+    status: string,
+    notes: string,
+    created_at: string,
+    updated_at: string,
+    items: Array<VendorInvoiceItem>
 }
 
 export interface VendorInvoiceItem {
     id: number,
-    vendor_invoice_id: number,
-    vendor_order_item_id: number,
+    invoice_id: number,
     vendor_item_id: number,
-    measure: string,
-    unit: string,
-    pack_size: string,
-    pack_number: string,
-    price: string,
-    quantity: string
+    quantity: number,
+    unit_price: string,
+    total_price: string,
+    vendor_item_name: string,
+    vendor_item_sku: string,
+    vendor_item_description: string,
+    case_size: number,
+    pack_size: number,
+    pack_unit: UnitType,
+    case_weight: string,
+    case_weight_unit: UnitType,
+    price_per_case: string,
+    price_per_unit: string,
+    total_units: number
+}
+
+// House Order System Models
+export interface HouseOrder {
+    id: number;
+    date: string; // ISO date
+    status: 'draft' | 'processing' | 'completed' | 'cancelled';
+    total_estimated_cost: number;
+    notes: string;
+    created_at: string;
+    updated_at: string;
+    items: HouseOrderItem[];
+    vendor_orders: VendorOrder[];
+}
+
+export interface HouseOrderItem {
+    id: number;
+    house_order_id: number;
+    house_item_id: number;
+    quantity: number;
+    priority: 'high' | 'normal' | 'low';
+    house_item: HouseItem; // Populated house item details
+    vendor_breakdowns: VendorOrderBreakdown[];
+}
+
+export interface VendorOrderBreakdown {
+    id: number;
+    house_order_item_id: number;
+    vendor_order_id: number;
+    vendor_item_id: number;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+    selection_reason: string; // Why this vendor was chosen
+    vendor_item: VendorItem; // Populated vendor item details
 }

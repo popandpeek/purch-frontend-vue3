@@ -32,8 +32,8 @@ const { inventories } = storeToRefs(inventoriesStore)
 
 onMounted(async () => {
   await inventoriesStore.fetchInventories()
-  console.log('🔍 Inventories after fetch:', inventories.value)
-  console.log('🔍 Inventories length:', inventories.value?.length)
+  console.log('Inventories after fetch:', inventories.value)
+  console.log('Inventories length:', inventories.value?.length)
 })
 
 </script>

@@ -19,7 +19,7 @@ export const useInventoriesStore = defineStore({
     async fetchInventories() {
       // Check if this endpoint exists or needs to be updated
       const response = await instance.get('/inventories/');
-      console.log('🔍 Inventories response:', response.data);
+      console.log('Inventories response:', response.data);
       this.inventories = response.data;
     },
     async setQuantity(payload: HouseInventoryUpdateItem) {

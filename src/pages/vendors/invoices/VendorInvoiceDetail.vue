@@ -89,8 +89,8 @@ const invoiceStatus = computed(() => {
 });
 
 const invoiceItems = computed(() => {
-  console.log('🔍 Invoice item:', invoiceItem.value);
-  console.log('🔍 Invoice items:', invoiceItem.value?.items);
+  console.log('Invoice item:', invoiceItem.value);
+  console.log('Invoice items:', invoiceItem.value?.items);
   return invoiceItem.value?.items;
 });
 
@@ -106,7 +106,12 @@ const vendorName = computed(() => {
  * methods
  */
 const backwards = () => {
-  return router.go(-1);
+  // Navigate to vendor invoices list for this vendor
+  if (invoiceItem.value?.vendor_id) {
+    router.push(`/vendors/${invoiceItem.value.vendor_id}/invoices`);
+  } else {
+    router.push('/vendors');
+  }
 };
 </script>
 

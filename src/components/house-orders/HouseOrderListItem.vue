@@ -2,7 +2,7 @@
   <div>
     <base-input-list-item>
       <p>{{ houseItemName }}</p>
-      <p>${{ props.price }}</p>
+      <p>${{ Number(props.price).toFixed(2) }}</p>
       <p>{{ props.measure }}</p>
       <p v-if="props.orderSubmitted">{{ props.quantity }}</p>
       <p v-else><input v-model="amount" type="string" /></p>
@@ -37,10 +37,10 @@ const props = defineProps({
   },
   houseItemId: {
     type: Number,
-    required: true,
+    required: false,
   },
   quantity: {
-    type: String,
+    type: [String, Number],
     required: true,
   },
   measure: {
@@ -48,12 +48,12 @@ const props = defineProps({
     required: true,
   },
   price: {
-    type: String,
+    type: [String, Number],
     required: true,
   },
   orderId: {
     type: Number,
-    required: true,
+    required: false,
   },
   orderSubmitted: {
     type: Boolean,
@@ -66,19 +66,24 @@ const props = defineProps({
 */
 const amount = computed({
   get() {
-    return props.quantity;
+    return String(props.quantity);
   },
   set(newValue) {
-    orderStore.setQuantity({
-      order_id: props.orderId,
-      order_item_id: props.id,
-      updated_quantity: newValue,
-    });
+    if (props.orderId) {
+      orderStore.setQuantity({
+        order_id: props.orderId,
+        order_item_id: props.id,
+        updated_quantity: newValue,
+      });
+    }
   },
 });
 
 const houseItemName = computed(() => {
-  return itemStore.items.find((item) => item.id === props.houseItemId)?.name;
+  if (props.houseItemId) {
+    return itemStore.items.find((item) => item.id === props.houseItemId)?.name || 'Unknown Item';
+  }
+  return 'Unknown Item';
 });
 </script>
 

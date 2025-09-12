@@ -76,15 +76,15 @@ const viewDetailsLink = computed(() => {
 })
 
 onMounted(() => {
-  console.log('🔍 HouseProductItem props:', props)
-  console.log('🔍 HouseProductItem name:', props.name)
-  console.log('🔍 HouseProductItem curPrice:', props.curPrice)
-  console.log('🔍 HouseProductItem measure:', props.measure)
-  console.log('🔍 HouseProductItem description:', props.description)
-  console.log('🔍 HouseProductItem storageLocation:', props.storageLocation)
-  console.log('🔍 HouseProductItem category:', props.category)
-  console.log('🔍 HouseProductItem par:', props.par)
-  console.log('🔍 HouseProductItem have:', props.have)
+  console.log('HouseProductItem props:', props)
+  console.log('HouseProductItem name:', props.name)
+  console.log('HouseProductItem curPrice:', props.curPrice)
+  console.log('HouseProductItem measure:', props.measure)
+  console.log('HouseProductItem description:', props.description)
+  console.log('HouseProductItem storageLocation:', props.storageLocation)
+  console.log('HouseProductItem category:', props.category)
+  console.log('HouseProductItem par:', props.par)
+  console.log('HouseProductItem have:', props.have)
 })
 
 </script>

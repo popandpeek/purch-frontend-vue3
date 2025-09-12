@@ -31,13 +31,13 @@ const { items } = storeToRefs(houseItemsStore)
 
 onMounted(async () => {
   await houseItemsStore.fetchHouseItems()
-  console.log('🔍 Items after fetch:', items.value)
-  console.log('🔍 Items length:', items.value?.length)
+  console.log('Items after fetch:', items.value)
+  console.log('Items length:', items.value?.length)
   if (items.value && items.value.length > 0) {
-    console.log('🔍 First item details:', items.value[0])
-    console.log('🔍 First item name:', items.value[0].name)
-    console.log('🔍 First item cur_price:', items.value[0].cur_price)
-    console.log('🔍 First item unit:', items.value[0].unit)
+    console.log('First item details:', items.value[0])
+    console.log('First item name:', items.value[0].name)
+    console.log('First item cur_price:', items.value[0].cur_price)
+    console.log('First item unit:', items.value[0].unit)
   }
 })
 

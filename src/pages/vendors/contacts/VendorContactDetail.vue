@@ -45,8 +45,9 @@ const vendor = computed(() => {
   return vendors.find((item) => item.id === Number(props.vendorId))!
 })
 
-const backToVendors = () => { 
-  return router.go(-1)
+const backToVendors = () => {
+  // Navigate to vendor management page
+  router.push('/vendors');
 }
 
 </script>

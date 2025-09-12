@@ -22,7 +22,7 @@ setPersistence(auth, browserLocalPersistence)
     console.log('✅ Firebase auth persistence set to LOCAL');
   })
   .catch((error) => {
-    console.error('❌ Error setting Firebase auth persistence:', error);
+    console.error('Error setting Firebase auth persistence:', error);
   });
 
 export { auth };

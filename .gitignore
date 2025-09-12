@@ -2,7 +2,7 @@
 node_modules
 /dist
 config-secure.js
-
+/docs-archived
 
 # local env files
 .env
