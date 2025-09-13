@@ -6,6 +6,7 @@ import HouseItemDetail from "./pages/products/HouseItemDetail.vue";
 import HouseItemRegistration from "./pages/products/HouseItemRegistration.vue";
 import HouseOrderDetail from "./pages/orders/HouseOrderDetail.vue";
 import HouseOrderList from "./pages/orders/HouseOrderList.vue";
+import HouseOrderManagement from "./pages/orders/HouseOrderManagement.vue";
 import InventoryDetail from "./pages/inventories/InventoryDetail.vue";
 import InventoryList from "./pages/inventories/InventoryList.vue";
 import InventoryManagement from "./pages/inventories/InventoryManagement.vue";
@@ -48,7 +49,8 @@ export const router = createRouter({
     { path: "/items/:houseItemId/edit", component: HouseItemEditPage, props: true, meta: { requiresAuth: true } },
     { path: "/items/registration", component: HouseItemRegistration, meta: { requiresAuth: true } },
     { path: "/orders", component: OrderManagement, meta: { requiresAuth: true } },
-    { path: "/orders/house", component: HouseOrderList, meta: { requiresAuth: true } },
+    { path: "/orders/house", component: HouseOrderManagement, meta: { requiresAuth: true } },
+    { path: "/orders/house/legacy", component: HouseOrderList, meta: { requiresAuth: true } },
     { path: "/orders/house/:houseOrderId", component: HouseOrderDetail, props: true, meta: { requiresAuth: true } },
     { path: "/orders/house/:houseOrderId/edit", component: NewOrderPage, props: true, meta: { requiresAuth: true } },
     { path: "/orders/new", component: NewOrderPage, meta: { requiresAuth: true } },

@@ -20,21 +20,21 @@
     <!-- Order Tabs -->
     <div class="order-tabs">
       <button 
-        class="tab-btn" 
-        :class="{ active: activeTab === 'house' }"
+        class="tab-btn active"
         @click="activeTab = 'house'"
       >
         House Orders
         <span class="tab-count">{{ houseOrders.length }}</span>
       </button>
-      <button 
+      <!-- Vendor Orders tab temporarily disabled during development -->
+      <!-- <button 
         class="tab-btn" 
         :class="{ active: activeTab === 'vendor' }"
         @click="activeTab = 'vendor'"
       >
         Vendor Orders
         <span class="tab-count">{{ vendorOrders.length }}</span>
-      </button>
+      </button> -->
     </div>
 
     <!-- Two Panel Layout -->
@@ -107,7 +107,7 @@
               </div>
             </div>
 
-            <OrderDetails :order="selectedOrder" :type="getOrderType(selectedOrder)" />
+            <OrderDetailsWithVendorSelection :order="selectedOrder" />
           </div>
         </div>
       </div>
@@ -118,54 +118,35 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHouseOrderStore } from '../../stores/house-orders';
+import { useHouseOrdersStore } from '../../stores/house-orders';
 import { useVendorOrderStore } from '../../stores/vendor-orders';
 import OrderCard from '../../components/orders/OrderCard.vue';
-import OrderDetails from '../../components/orders/OrderDetails.vue';
-import type { HouseOrder, VendorOrder } from '../../api/model';
+import OrderDetailsWithVendorSelection from '../../components/orders/OrderDetailsWithVendorSelection.vue';
+import type { HouseOrder } from '../../stores/house-orders';
 
 const router = useRouter();
 const route = useRoute();
-const houseOrderStore = useHouseOrderStore();
+const houseOrderStore = useHouseOrdersStore();
 const vendorOrderStore = useVendorOrderStore();
 
 // Reactive state
 const activeTab = ref<'house' | 'vendor'>('house');
 const searchQuery = ref('');
-const selectedOrder = ref<HouseOrder | VendorOrder | null>(null);
+const selectedOrder = ref<HouseOrder | null>(null);
 const loading = ref(false);
 const vendorFilter = ref<string | null>(null);
 
 // Computed properties
 const houseOrders = computed(() => houseOrderStore.orders);
-const vendorOrders = computed(() => vendorOrderStore.vendorOrders);
+// const vendorOrders = computed(() => vendorOrderStore.vendorOrders); // Temporarily disabled
 
 const currentOrders = computed(() => {
-  switch (activeTab.value) {
-    case 'house':
-      return houseOrders.value;
-    case 'vendor':
-      return vendorOrders.value;
-    default:
-      return [];
-  }
+  // For now, only handle house orders during development
+  return houseOrders.value;
 });
 
 const filteredOrders = computed(() => {
-  let orders: (HouseOrder | VendorOrder)[] = currentOrders.value;
-  
-  // Apply vendor filter if set
-  if (vendorFilter.value) {
-    orders = orders.filter(order => {
-      // For vendor orders, check vendor_id
-      if ('vendor_id' in order) {
-        return order.vendor_id === parseInt(vendorFilter.value!);
-      }
-      // For house orders, we could check if any items are from this vendor
-      // For now, we'll show all house orders when vendor filter is active
-      return true;
-    });
-  }
+  let orders: HouseOrder[] = currentOrders.value;
   
   // Apply search filter
   if (!searchQuery.value) return orders;
@@ -173,8 +154,8 @@ const filteredOrders = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return orders.filter(order => {
     const orderId = order.id.toString();
-    const date = order.date || '';
-    const status = order.status || '';
+    const date = order.date;
+    const status = order.status;
     
     return orderId.includes(query) || 
            date.toLowerCase().includes(query) || 
@@ -183,7 +164,7 @@ const filteredOrders = computed(() => {
 });
 
 // Methods
-const selectOrder = (order: HouseOrder | VendorOrder) => {
+const selectOrder = (order: HouseOrder) => {
   selectedOrder.value = order;
 };
 
@@ -198,15 +179,9 @@ const getTabTitle = () => {
   }
 };
 
-const getOrderType = (order: HouseOrder | VendorOrder | null): 'house' | 'vendor' => {
+const getOrderType = (order: HouseOrder | null): 'house' | 'vendor' => {
   if (!order) return 'house';
-  
-  // Check if it's a vendor order by looking for vendor_id property
-  if ('vendor_id' in order) {
-    return 'vendor';
-  }
-  
-  return 'house';
+  return 'house'; // For now, all orders are house orders
 };
 
 const createNewOrder = () => {
@@ -243,7 +218,7 @@ const refreshOrders = async () => {
   loading.value = true;
   try {
     if (activeTab.value === 'house') {
-      await houseOrderStore.fetchHouseOrders();
+      await houseOrderStore.fetchOrders();
     } else {
       await vendorOrderStore.fetchVendorOrders();
     }

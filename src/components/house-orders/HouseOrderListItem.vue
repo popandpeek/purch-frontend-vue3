@@ -15,13 +15,13 @@
  * imports
  */
 import { computed } from "vue";
-import { useHouseOrderStore } from "@/stores/house-orders";
+import { useHouseOrdersStore } from "@/stores/house-orders";
 import { useHouseItemsStore } from "@/stores/house-items";
 
 /*
   store
 */
-const orderStore = useHouseOrderStore();
+const orderStore = useHouseOrdersStore();
 const itemStore = useHouseItemsStore();
 const { fetchHouseItems } = useHouseItemsStore();
 

@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { HouseOrder, VendorOrder, HouseOrderItem, VendorOrderItem } from '../../api/model';
+import type { HouseOrder, VendorOrder, HouseOrderItem, VendorOrderItem } from '../../stores/house-orders';
 
 interface Props {
   order: HouseOrder | VendorOrder;

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useHouseItemsStore } from "./house-items";
+import { useHouseOrdersStore } from "./house-orders";
 import { useVendorOrderStore } from "./vendor-orders";
 import { useInvoiceStore } from "./vendor-invoices";
 import { useInventoriesStore } from "./inventories";
@@ -19,11 +20,10 @@ export const useDashboardStore = defineStore({
     
     // Pending orders count and total value
     pendingOrders: () => {
-      const vendorOrderStore = useVendorOrderStore();
-      const pending = vendorOrderStore.vendorOrders.filter(order => order.status === 'pending');
+      const houseOrderStore = useHouseOrdersStore();
+      const pending = houseOrderStore.orders.filter(order => order.status === 'submitted' || order.status === 'processing');
       const totalValue = pending.reduce((sum, order) => {
-        if (order.total_amount === undefined || order.total_amount === null) return sum;
-        return sum + order.total_amount;
+        return sum + order.total_estimated_cost;
       }, 0);
       return {
         count: pending.length,
@@ -80,17 +80,17 @@ export const useDashboardStore = defineStore({
         status?: string;
       }> = [];
       
-      const vendorOrderStore = useVendorOrderStore();
+      const houseOrderStore = useHouseOrdersStore();
       const vendorInvoiceStore = useInvoiceStore();
       const inventoryStore = useInventoriesStore();
       
-      // Add recent orders
-      vendorOrderStore.vendorOrders.slice(0, 5).forEach(order => {
+      // Add recent house orders
+      houseOrderStore.orders.slice(0, 5).forEach(order => {
         activities.push({
           id: `order-${order.id}`,
           type: 'order',
-          title: `Order #${order.id} created`,
-          timestamp: order.created_at,
+          title: `House Order #${order.id} created`,
+          timestamp: order.created_at || order.date,
           status: order.status
         });
       });
@@ -136,7 +136,7 @@ export const useDashboardStore = defineStore({
         // Fetch all data in parallel
         await Promise.all([
           houseItemsStore.fetchHouseItems(),
-          vendorOrderStore.fetchVendorOrders(),
+          houseOrderStore.fetchOrders(),
           vendorInvoiceStore.fetchAllVendorInvoices(),
           inventoryStore.fetchInventories()
         ]);

@@ -238,11 +238,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useHouseOrderStore } from '../../stores/house-orders'
+import { useHouseOrdersStore } from '../../stores/house-orders'
 import type { HouseOrder } from '../../api/model'
 
 const router = useRouter()
-const houseOrderStore = useHouseOrderStore()
+const houseOrderStore = useHouseOrdersStore()
 
 // Reactive state
 const searchQuery = ref('')

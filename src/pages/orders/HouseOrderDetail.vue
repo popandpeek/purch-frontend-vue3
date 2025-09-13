@@ -201,7 +201,7 @@
 <script setup lang="ts">
 import { computed, defineProps, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHouseOrderStore } from '../../stores/house-orders'
+import { useHouseOrdersStore } from '../../stores/house-orders'
 import { useVendorOrderStore } from '../../stores/vendor-orders'
 import { formatStorageLocation, formatInventoryCategory } from '../../constants/enums'
 import type { HouseOrderItem } from '../../api/model'
@@ -209,7 +209,7 @@ import type { HouseOrderItem } from '../../api/model'
 /**
  * store
  */
-const houseOrderStore = useHouseOrderStore()
+const houseOrderStore = useHouseOrdersStore()
 const vendorOrderStore = useVendorOrderStore()
 
 /**
@@ -290,7 +290,7 @@ const loadOrder = async () => {
   error.value = null
   
   try {
-    await houseOrderStore.fetchHouseOrderById(Number(props.houseOrderId))
+    await houseOrderStore.fetchOrderById(Number(props.houseOrderId))
     // Also load vendor orders to get their totals
     await vendorOrderStore.fetchVendorOrders()
   } catch (err: any) {
@@ -331,7 +331,7 @@ const removeItem = async (item: HouseOrderItem) => {
 
 const generateVendorBreakdown = async () => {
   try {
-    await houseOrderStore.generateVendorBreakdown(Number(props.houseOrderId))
+    // await houseOrderStore.generateVendorBreakdown(Number(props.houseOrderId))
   } catch (err: any) {
     console.error('Error generating vendor breakdown:', err)
   }
@@ -349,7 +349,7 @@ const duplicateOrder = () => {
 const deleteOrder = async () => {
   if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
     try {
-      await houseOrderStore.deleteHouseOrder(Number(props.houseOrderId))
+      await houseOrderStore.deleteOrder(Number(props.houseOrderId))
       router.push('/orders/house')
     } catch (err: any) {
       console.error('Error deleting order:', err)
