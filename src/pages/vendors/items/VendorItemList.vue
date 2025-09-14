@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useVendorItemStore } from '../../../stores/vendor-items';
 import { useVendorStore } from '../../../stores/vendors';

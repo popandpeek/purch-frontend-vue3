@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useVendorOrderStore } from "@/stores/vendor-orders";
 import { useVendorStore } from "@/stores/vendors";

@@ -130,25 +130,68 @@ export const useAuthStore = defineStore('auth', {
     // Wait for auth state change and call callback
     waitForAuthStateChange(callback: (isAuthenticated: boolean) => void): () => void {
       // If we already have a definitive auth state, call immediately
-      if (this.isInitialized && this.firebaseUser !== undefined) {
+      if (this.isInitialized && this.firebaseUser !== null) {
         const isAuthenticated = !!this.firebaseUser;
         console.log('🔐 Using existing auth state, isAuthenticated:', isAuthenticated);
         callback(isAuthenticated);
         return () => {}; // Return empty unsubscribe function
       }
       
-      // Otherwise, wait for Firebase auth state to be determined
-      let hasCalled = false;
-      const unsubscribe = authService.onAuthStateChanged((firebaseUser) => {
-        if (!hasCalled) {
-          hasCalled = true;
-          const isAuthenticated = !!firebaseUser;
-          console.log('🔐 Auth state change callback triggered, isAuthenticated:', isAuthenticated);
-          callback(isAuthenticated);
-        }
-      });
+      // If initialized but no firebaseUser yet, wait for Firebase auth state change
+      // This handles the case where Firebase is still restoring the session
+      if (this.isInitialized && this.firebaseUser === null) {
+        console.log('🔐 Auth initialized but no user yet, waiting for Firebase auth state change...');
+        let hasCalled = false;
+        const unsubscribe = authService.onAuthStateChanged((firebaseUser) => {
+          if (!hasCalled) {
+            hasCalled = true;
+            const isAuthenticated = !!firebaseUser;
+            console.log('🔐 Auth state change callback triggered, isAuthenticated:', isAuthenticated);
+            callback(isAuthenticated);
+          }
+        });
+        
+        return unsubscribe;
+      }
       
-      return unsubscribe;
+      // If not initialized yet, wait for initialization first
+      if (!this.isInitialized) {
+        console.log('🔐 Auth not initialized yet, waiting for initialization...');
+        // Wait for initialization to complete
+        const checkInitialized = () => {
+          if (this.isInitialized) {
+            // Now check if we have a definitive auth state
+            if (this.firebaseUser !== null) {
+              const isAuthenticated = !!this.firebaseUser;
+              console.log('🔐 Auth initialized, using existing state, isAuthenticated:', isAuthenticated);
+              callback(isAuthenticated);
+            } else {
+              // Still waiting for Firebase auth state, wait a bit more
+              setTimeout(() => {
+                if (this.firebaseUser !== null) {
+                  const isAuthenticated = !!this.firebaseUser;
+                  console.log('🔐 Auth state determined after delay, isAuthenticated:', isAuthenticated);
+                  callback(isAuthenticated);
+                } else {
+                  // Still no user, call with false
+                  console.log('🔐 No user found after initialization, isAuthenticated: false');
+                  callback(false);
+                }
+              }, 300); // Give Firebase more time to restore session
+            }
+          } else {
+            // Still not initialized, check again in a bit
+            setTimeout(checkInitialized, 50);
+          }
+        };
+        checkInitialized();
+        return () => {}; // Return empty unsubscribe function
+      }
+      
+      // Fallback - should not reach here
+      console.warn('🔐 Unexpected state in waitForAuthStateChange');
+      callback(false);
+      return () => {};
     },
 
     // Check if current token is valid and refresh if needed

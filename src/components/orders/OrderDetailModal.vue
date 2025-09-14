@@ -5,15 +5,13 @@
         <h2>Order #{{ order?.id }}</h2>
         <div class="header-actions">
           <button class="btn btn-outline" @click="handleEdit" v-if="canEdit">
-            <span class="btn-icon">✏️</span>
             Edit
           </button>
           <button class="btn btn-primary" @click="handleSubmit" v-if="canSubmit">
-            <span class="btn-icon">📤</span>
             Submit Order
           </button>
           <button class="close-btn" @click="handleClose">
-            <span class="btn-icon">×</span>
+            Close
           </button>
         </div>
       </div>
@@ -83,7 +81,7 @@
                     @click="editItem(item)"
                     title="Edit Item"
                   >
-                    <span class="btn-icon">✏️</span>
+                    Edit
                   </button>
                   <button 
                     v-if="canEdit" 
@@ -91,7 +89,7 @@
                     @click="removeItem(item)"
                     title="Remove Item"
                   >
-                    <span class="btn-icon">🗑️</span>
+                    Remove
                   </button>
                 </div>
               </div>
@@ -108,9 +106,9 @@
                 class="vendor-order-card"
               >
                 <div class="vendor-info">
-                  <h4>{{ vendorOrder.vendor_name }}</h4>
+                  <h4>{{ vendorOrder.vendor?.name || 'Unknown Vendor' }}</h4>
                   <p class="vendor-details">
-                    Total: ${{ vendorOrder.total_cost.toFixed(2) }} | 
+                    Total: ${{ parseFloat(vendorOrder.total_amount || '0').toFixed(2) }} | 
                     Status: {{ vendorOrder.status }}
                   </p>
                   <p v-if="vendorOrder.delivery_date" class="delivery-date">
@@ -118,16 +116,16 @@
                   </p>
                 </div>
                 <div class="vendor-items">
-                  <h5>Items ({{ vendorOrder.items.length }})</h5>
+                  <h5>Items ({{ vendorOrder.items?.length || 0 }})</h5>
                   <div class="vendor-items-list">
                     <div
-                      v-for="item in vendorOrder.items"
+                      v-for="item in vendorOrder.items || []"
                       :key="item.id"
                       class="vendor-item"
                     >
-                      <span class="item-name">{{ item.house_item_name }}</span>
+                      <span class="item-name">{{ item.vendor_item_name }}</span>
                       <span class="item-quantity">{{ item.quantity }}</span>
-                      <span class="item-price">${{ item.total_price.toFixed(2) }}</span>
+                      <span class="item-price">${{ parseFloat(item.total_price).toFixed(2) }}</span>
                     </div>
                   </div>
                 </div>
@@ -337,10 +335,6 @@ const handleOverlayClick = (event: MouseEvent) => {
   color: #495057;
 }
 
-.btn-icon {
-  font-size: 1.1rem;
-  font-weight: bold;
-}
 
 .modal-body {
   flex: 1;

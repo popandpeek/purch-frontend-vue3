@@ -129,6 +129,7 @@ export const useDashboardStore = defineStore({
       this.error = null;
       try {
         const houseItemsStore = useHouseItemsStore();
+        const houseOrderStore = useHouseOrdersStore();
         const vendorOrderStore = useVendorOrderStore();
         const vendorInvoiceStore = useInvoiceStore();
         const inventoryStore = useInventoriesStore();

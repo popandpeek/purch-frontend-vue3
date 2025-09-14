@@ -14,7 +14,7 @@
 /**
  * imports
  */
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 import { useVendorItemStore } from "@/stores/vendor-items";
 
 /**

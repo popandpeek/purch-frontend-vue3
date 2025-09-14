@@ -12,7 +12,7 @@
       </div>
       <div class="order-actions">
         <button class="action-btn" @click="handleView" title="View Order">
-          <span class="btn-icon">👁️</span>
+          View
         </button>
         <button 
           v-if="canEdit" 
@@ -20,7 +20,7 @@
           @click="handleEdit" 
           title="Edit Order"
         >
-          <span class="btn-icon">✏️</span>
+          Edit
         </button>
         <button 
           v-if="canSubmit" 
@@ -28,7 +28,7 @@
           @click="handleSubmit" 
           title="Submit Order"
         >
-          <span class="btn-icon">📤</span>
+          Submit
         </button>
         <button 
           v-if="canDelete" 
@@ -36,7 +36,7 @@
           @click="handleDelete" 
           title="Delete Order"
         >
-          <span class="btn-icon">🗑️</span>
+          Delete
         </button>
       </div>
     </div>
@@ -50,7 +50,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Total Cost:</span>
-          <span class="summary-value">${{ (order.total_estimated_cost || order.total_amount || 0).toFixed(2) }}</span>
+          <span class="summary-value">${{ (order.total_estimated_cost || 0).toFixed(2) }}</span>
         </div>
         <div v-if="order.vendor_orders?.length" class="summary-row">
           <span class="summary-label">Vendor Orders:</span>
@@ -91,8 +91,8 @@
             :key="vendorOrder.id"
             class="vendor-preview"
           >
-            <span class="vendor-name">{{ vendorOrder.vendor_name }}</span>
-            <span class="vendor-cost">${{ vendorOrder.total_cost.toFixed(2) }}</span>
+            <span class="vendor-name">{{ vendorOrder.vendor?.name || 'Unknown Vendor' }}</span>
+            <span class="vendor-cost">${{ parseFloat(vendorOrder.total_amount || '0').toFixed(2) }}</span>
           </div>
           <div v-if="order.vendor_orders.length > 2" class="more-vendors">
             +{{ order.vendor_orders.length - 2 }} more vendors
@@ -145,7 +145,7 @@ const canSubmit = computed(() =>
 );
 
 const canDelete = computed(() => 
-  props.order.status === 'draft' || props.order.status === 'cancelled'
+  props.order.status === 'draft'
 );
 
 // Methods

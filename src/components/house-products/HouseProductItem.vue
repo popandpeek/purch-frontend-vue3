@@ -17,7 +17,7 @@
 /**
  * imports
  */
-import { computed, defineProps, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 
 /**

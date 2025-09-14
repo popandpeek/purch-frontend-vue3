@@ -199,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHouseOrdersStore } from '../../stores/house-orders'
 import { useVendorOrderStore } from '../../stores/vendor-orders'

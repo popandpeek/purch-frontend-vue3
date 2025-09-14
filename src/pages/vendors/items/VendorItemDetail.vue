@@ -138,7 +138,7 @@
 /**
  * imports
  */
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVendorItemStore } from '../../../stores/vendor-items'
 import { useVendorStore } from "@/stores/vendors";

@@ -155,7 +155,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, defineProps, ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHouseItemsStore } from '../../stores/house-items'
 import { useVendorStore } from '../../stores/vendors'

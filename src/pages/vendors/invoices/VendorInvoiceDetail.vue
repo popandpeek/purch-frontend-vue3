@@ -32,7 +32,7 @@
 /**
  * imports
  */
-import { defineProps, computed } from "vue";
+import { computed } from "vue";
 import { useInvoiceStore } from "../../../stores/vendor-invoices";
 import { useRouter } from "vue-router";
 import VendorInvoiceListItem from "@/components/vendors/vendor-invoices/VendorInvoiceListItem.vue";

@@ -165,6 +165,9 @@ router.beforeEach(async (to, _from, next) => {
     await authStore.initializeAuth();
   }
   
+  // Give Firebase a moment to restore the session
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
   // Wait for Firebase auth state to be determined
   return new Promise((resolve) => {
     let unsubscribe: (() => void) | null = null;
@@ -180,8 +183,8 @@ router.beforeEach(async (to, _from, next) => {
         console.log('🔐 Router: Redirecting to auth page');
         next('/auth');
       } else if (to.meta.requiresGuest && isAuthenticated) {
-        console.log('🔐 Router: Redirecting to home page');
-        next('/');
+        console.log('🔐 Router: Redirecting to dashboard');
+        next('/dashboard');
       } else {
         console.log('🔐 Router: Allowing navigation to:', to.path);
         next();

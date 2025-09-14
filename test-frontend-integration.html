@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Integration Test</title>
+</head>
+<body>
+    <h1>Frontend Integration Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Test the frontend API calls
+        async function testVendorSelectionAPIs() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h2>Testing Vendor Selection APIs...</h2>';
+            
+            // Test 1: Check if frontend can make authenticated requests
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/house-orders/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Note: In a real test, we'd need to include authentication headers
+                    }
+                });
+                
+                if (response.ok) {
+                    results.innerHTML += '<p style="color: green;">✓ Frontend can make API requests</p>';
+                } else {
+                    results.innerHTML += `<p style="color: red;">✗ API request failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<p style="color: red;">✗ API request error: ${error.message}</p>`;
+            }
+            
+            // Test 2: Check if vendor selection endpoints exist
+            const endpoints = [
+                '/api/v1/house-orders/1/vendor-selections',
+                '/api/v1/house-orders/items/1/config-inheritance',
+                '/api/v1/vendor-selection-config/order/1'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`http://localhost:3000${endpoint}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (response.status === 403) {
+                        results.innerHTML += `<p style="color: orange;">⚠ ${endpoint} - Authentication required (expected)</p>`;
+                    } else if (response.status === 404) {
+                        results.innerHTML += `<p style="color: red;">✗ ${endpoint} - Not found</p>`;
+                    } else {
+                        results.innerHTML += `<p style="color: green;">✓ ${endpoint} - Available (${response.status})</p>`;
+                    }
+                } catch (error) {
+                    results.innerHTML += `<p style="color: red;">✗ ${endpoint} - Error: ${error.message}</p>`;
+                }
+            }
+        }
+        
+        // Run tests when page loads
+        window.onload = testVendorSelectionAPIs;
+    </script>
+</body>
+</html>

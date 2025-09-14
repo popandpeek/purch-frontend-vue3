@@ -29,30 +29,42 @@ export interface VendorOrder {
   vendor_id: number;
   date: string;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
-  total_amount: number;
+  total_amount: string; // Backend returns as string
+  total_cost?: number; // Alias for total_amount
   notes: string;
   submitted: boolean;
+  delivery_date?: string; // Expected delivery date
   created_at: string;
   updated_at: string;
   items: VendorOrderItem[];
   vendor: {
     id: number;
     name: string;
-    contact_person: string;
-    email: string;
+    contact_first_name: string;
+    contact_last_name: string;
+    contact_email: string;
     phone: string;
-  };
+  } | null;
 }
 
 export interface VendorOrderItem {
   id: number;
-  house_item_id: number;
-  house_item_name: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
+  order_id: number;
   vendor_item_id: number;
+  quantity: number;
+  unit_price: string; // Backend returns as string
+  total_price: string; // Backend returns as string
   vendor_item_name: string;
+  vendor_item_sku: string;
+  vendor_item_description: string;
+  case_size: number;
+  pack_size: number;
+  pack_unit: string;
+  case_weight: string;
+  case_weight_unit: string;
+  price_per_case: string;
+  price_per_unit: string;
+  total_units: number;
 }
 
 
@@ -356,6 +368,47 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
       throw new Error('Order ID is required');
     }
     
+    // Transform vendor orders to ensure they have the correct structure
+    const vendorOrders = (order.vendor_orders || order[9] || []).map((vo: any) => ({
+      id: vo.id,
+      house_order_id: vo.house_order_id,
+      vendor_id: vo.vendor_id,
+      date: vo.date,
+      status: vo.status,
+      total_amount: vo.total_amount || '0.00', // Backend returns as string
+      notes: vo.notes || '',
+      submitted: vo.submitted || false,
+      created_at: vo.created_at,
+      updated_at: vo.updated_at,
+      items: (vo.items || []).map((item: any) => ({
+        id: item.id,
+        order_id: item.order_id,
+        vendor_item_id: item.vendor_item_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price || '0.00',
+        total_price: item.total_price || '0.00',
+        vendor_item_name: item.vendor_item_name || '',
+        vendor_item_sku: item.vendor_item_sku || '',
+        vendor_item_description: item.vendor_item_description || '',
+        case_size: item.case_size || 1,
+        pack_size: item.pack_size || 1,
+        pack_unit: item.pack_unit || 'each',
+        case_weight: item.case_weight || '0.000',
+        case_weight_unit: item.case_weight_unit || 'each',
+        price_per_case: item.price_per_case || '0.00',
+        price_per_unit: item.price_per_unit || '0.00',
+        total_units: item.total_units || 1
+      })),
+      vendor: vo.vendor ? {
+        id: vo.vendor.id,
+        name: vo.vendor.name,
+        contact_first_name: vo.vendor.contact_first_name || '',
+        contact_last_name: vo.vendor.contact_last_name || '',
+        contact_email: vo.vendor.contact_email || '',
+        phone: vo.vendor.phone || ''
+      } : null
+    }));
+    
     return {
       id: Number(id),
       date: order.date || order[1],
@@ -365,7 +418,7 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
       created_at: order.created_at || order[6],
       updated_at: order.updated_at || order[7],
       items: order.items || order[8] || [],
-      vendor_orders: order.vendor_orders || order[9] || [],
+      vendor_orders: vendorOrders,
       vendor_selection_config: order.vendor_selection_config || order[10] || getDefaultVendorSelectionConfig()
     };
   };

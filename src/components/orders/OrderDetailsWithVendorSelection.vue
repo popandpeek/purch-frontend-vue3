@@ -125,13 +125,13 @@
           <div class="vendor-order-details">
             <div class="detail-item">
               <span class="label">Total Amount:</span>
-              <span class="value">${{ vendorOrder.total_amount.toFixed(2) }}</span>
+              <span class="value">${{ parseFloat(vendorOrder.total_amount || '0').toFixed(2) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">Items:</span>
-              <span class="value">{{ vendorOrder.items.length }}</span>
+              <span class="value">{{ vendorOrder.items?.length || 0 }}</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-item"> 
               <span class="label">Submitted:</span>
               <span class="value">{{ vendorOrder.submitted ? 'Yes' : 'No' }}</span>
             </div>
@@ -154,7 +154,7 @@
             :level-id="order.id"
             :available-vendors="availableVendors"
             :show-inheritance="true"
-            :inheritance="configInheritance"
+            :inheritance="configInheritance || undefined"
             :loading="loading"
             @update:config="updateOrderConfig"
             @save="saveOrderConfig"
@@ -191,11 +191,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useHouseOrdersStore } from '../../stores/house-orders';
-import { useVendorsStore } from '../../stores/vendors';
+import { useVendorStore } from '../../stores/vendors';
 import VendorSelectionConfig from '../vendor-selection/VendorSelectionConfig.vue';
 import VendorSelectionResults from '../vendor-selection/VendorSelectionResults.vue';
 import VendorComparison from '../vendor-selection/VendorComparison.vue';
-import type { HouseOrder, VendorSelection, VendorSelectionConfig, ConfigInheritance, VendorItem, HouseOrderItem } from '../../stores/house-orders';
+import type { HouseOrder, VendorSelection as VendorSelectionType, VendorSelectionConfig as VendorSelectionConfigType, ConfigInheritance, VendorItem, HouseOrderItem } from '../../stores/house-orders';
 
 interface Props {
   order: HouseOrder;
@@ -204,13 +204,13 @@ interface Props {
 const props = defineProps<Props>();
 
 const houseOrderStore = useHouseOrdersStore();
-const vendorsStore = useVendorsStore();
+const vendorsStore = useVendorStore();
 
 // Reactive state
 const loading = ref(false);
 const showConfigModal = ref(false);
 const showComparisonModal = ref(false);
-const vendorSelections = ref<VendorSelection[]>([]);
+const vendorSelections = ref<VendorSelectionType[]>([]);
 const configInheritance = ref<ConfigInheritance | null>(null);
 const selectedItem = ref<HouseOrderItem | null>(null);
 const vendorItems = ref<VendorItem[]>([]);
@@ -241,7 +241,7 @@ const runVendorSelection = async () => {
   }
 };
 
-const handleVendorOverride = async (selection: VendorSelection, vendorItemId: number) => {
+const handleVendorOverride = async (selection: VendorSelectionType, vendorItemId: number) => {
   try {
     await houseOrderStore.overrideVendorSelection(selection.vendor_item.id, vendorItemId);
     // Refresh vendor selections after override
@@ -276,12 +276,12 @@ const closeConfigModal = () => {
   showConfigModal.value = false;
 };
 
-const updateOrderConfig = (config: VendorSelectionConfig) => {
+const updateOrderConfig = (config: VendorSelectionConfigType) => {
   // Update local config
   props.order.vendor_selection_config = config;
 };
 
-const saveOrderConfig = async (config: VendorSelectionConfig) => {
+const saveOrderConfig = async (config: VendorSelectionConfigType) => {
   loading.value = true;
   try {
     await houseOrderStore.updateVendorSelectionConfig('order', props.order.id, config);

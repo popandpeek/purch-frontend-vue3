@@ -102,16 +102,13 @@ onMounted(async () => {
   // Initialize Firebase auth state listener
   await authStore.initializeAuth();
   
-  // If user is already authenticated, redirect to dashboard
-  if (authStore.isAuthenticated) {
-    console.log('🔐 User already authenticated, redirecting to dashboard');
-    router.push('/');
-  }
+  // Note: Router guard handles redirecting authenticated users away from /auth
+  // No need for additional redirect logic here
 });
 
 const handleAuthSuccess = () => {
-  // Redirect to dashboard or home page
-  router.push('/');
+  // Redirect to dashboard
+  router.push('/dashboard');
 };
 
 const handleResetSent = () => {

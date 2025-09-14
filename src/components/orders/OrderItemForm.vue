@@ -3,7 +3,7 @@
     <div class="item-header">
       <h4>Item {{ index + 1 }}</h4>
       <button type="button" class="remove-btn" @click="handleRemove">
-        <span class="btn-icon">×</span>
+        Remove
       </button>
     </div>
 
@@ -78,7 +78,7 @@
         </div>
         <div class="detail-row" v-if="selectedHouseItem.current_price_per_unit">
           <span class="detail-label">Current Price:</span>
-          <span class="detail-value">${{ selectedHouseItem.current_price_per_unit.toFixed(2) }}/{{ selectedHouseItem.tracking_unit }}</span>
+          <span class="detail-value">${{ parseFloat(selectedHouseItem.current_price_per_unit).toFixed(2) }}/{{ selectedHouseItem.tracking_unit }}</span>
         </div>
         <div class="detail-row" v-if="selectedHouseItem.par_level">
           <span class="detail-label">Par Level:</span>
@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
-import { useHouseItemsStore, type HouseItem } from '@/stores/house-items';
+import { useHouseItemsStore } from '@/stores/house-items';
 import type { HouseOrderItem } from '@/stores/house-orders';
 
 // Props
@@ -129,14 +129,14 @@ const itemData = reactive<HouseOrderItem>({
 });
 
 // Computed
-const houseItems = computed(() => houseItemsStore.houseItems);
+const houseItems = computed(() => houseItemsStore.items || []);
 const selectedHouseItem = computed(() => 
-  houseItems.value.find(item => item.id === itemData.house_item_id)
+  houseItems.value.find((item: any) => item.id === itemData.house_item_id)
 );
 
 const estimatedCost = computed(() => {
   if (selectedHouseItem.value?.current_price_per_unit && itemData.quantity) {
-    return selectedHouseItem.value.current_price_per_unit * itemData.quantity;
+    return parseFloat(selectedHouseItem.value.current_price_per_unit) * itemData.quantity;
   }
   return 0;
 });
@@ -235,9 +235,6 @@ onMounted(async () => {
   background: #c82333;
 }
 
-.btn-icon {
-  font-size: 1.1rem;
-}
 
 .item-form {
   display: flex;

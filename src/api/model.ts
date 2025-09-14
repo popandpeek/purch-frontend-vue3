@@ -105,9 +105,12 @@ export interface VendorOrder {
     id: number;
     house_order_id: number | null; // Link to originating house order
     vendor_id: number;
+    vendor_name?: string; // Populated vendor name
     date: string;
     status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
     total_amount: number;
+    total_cost?: number; // Alias for total_amount
+    delivery_date?: string; // Expected delivery date
     notes: string;
     submitted: boolean;
     created_at: string;
@@ -135,8 +138,10 @@ export interface VendorItem {
     product_name: string,
     description: string,
     brand: string,
+    brand_name?: string, // Alternative brand field
     category: string,
     sku: string,
+    vendor_SKU?: string, // Alternative SKU field
     case_size: number,
     pack_size: number,
     pack_unit: string,
@@ -199,7 +204,8 @@ export interface VendorInvoiceItem {
 export interface HouseOrder {
     id: number;
     date: string; // ISO date
-    status: 'draft' | 'processing' | 'completed' | 'cancelled';
+    status: 'draft' | 'processing' | 'submitted' | 'completed' | 'cancelled';
+    priority?: 'high' | 'normal' | 'low'; // Order priority
     total_estimated_cost: number;
     notes: string;
     created_at: string;

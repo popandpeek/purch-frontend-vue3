@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineProps } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useInventoriesStore } from "@/stores/inventories";
 import InventoryItemListItem from "@/components/inventories/InventoryItemListItem.vue";

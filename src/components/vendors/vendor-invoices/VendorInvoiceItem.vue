@@ -19,7 +19,7 @@
 /**
  * imports
  */
-import { defineProps } from "vue"
+// defineProps is a compiler macro and doesn't need to be imported
 
 /**
  * props
