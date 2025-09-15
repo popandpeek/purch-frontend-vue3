@@ -53,19 +53,28 @@
 
     <div class="invoice-footer">
       <div class="invoice-actions">
-        <button class="action-btn edit" @click="handleEdit">
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          @click="handleEdit"
+        >
           Edit
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           v-if="invoice.status !== 'paid'" 
-          class="action-btn pay" 
+          variant="primary" 
+          size="md" 
           @click="handlePay"
         >
           Pay
-        </button>
-        <button class="action-btn delete" @click="handleDelete">
+        </BaseButton>
+        <BaseButton 
+          variant="danger" 
+          size="md" 
+          @click="handleDelete"
+        >
           Delete
-        </button>
+        </BaseButton>
       </div>
     </div>
   </div>
@@ -74,6 +83,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useVendorStore } from '../../stores/vendors';
+import BaseButton from '../ui/BaseButton.vue';
 import type { VendorInvoice } from '../../api/model';
 
 interface Props {
@@ -400,47 +410,6 @@ const handleDelete = () => {
   flex-wrap: wrap;
 }
 
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #bdc3c7;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: #f8f9fa;
-  border-color: #3d008d;
-  color: #3d008d;
-}
-
-.action-btn.view:hover {
-  background: #e8f4fd;
-}
-
-.action-btn.edit:hover {
-  background: #fff3cd;
-  border-color: #f39c12;
-  color: #f39c12;
-}
-
-.action-btn.pay:hover {
-  background: #d4edda;
-  border-color: #27ae60;
-  color: #27ae60;
-}
-
-.action-btn.delete:hover {
-  background: #f8d7da;
-  border-color: #e74c3c;
-  color: #e74c3c;
-}
 
 .btn-icon {
   font-size: 1rem;

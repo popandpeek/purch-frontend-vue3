@@ -62,13 +62,6 @@
         Adjust Count
       </button>
       <button 
-        class="action-btn primary" 
-        @click="$emit('create-order', item)"
-        :disabled="!canOrder"
-      >
-        Create Order
-      </button>
-      <button 
         class="action-btn tertiary" 
         @click="$emit('view-details', item)"
       >
@@ -89,7 +82,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'order-more': [item: HouseItem];
   'adjust-count': [item: HouseItem];
   'view-details': [item: HouseItem];
 }>();

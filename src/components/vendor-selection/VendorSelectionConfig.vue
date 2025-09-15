@@ -41,30 +41,17 @@
         <p class="form-help">When enabled, faster delivery options will be preferred over cost savings</p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Quality Preference</label>
-        <select v-model="localConfig.quality_preference" class="form-select" @change="updateConfig">
-          <option value="budget">Budget</option>
-          <option value="standard">Standard</option>
-          <option value="premium">Premium</option>
-        </select>
-      </div>
 
       <div class="form-group">
-        <label class="form-label">Organic Preference</label>
-        <div class="slider-container">
+        <label class="form-label">
           <input 
-            v-model.number="localConfig.organic_preference" 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.1"
-            class="form-range"
+            v-model="localConfig.organic_preference" 
+            type="checkbox" 
             @change="updateConfig"
           >
-          <span class="slider-value">{{ Math.round(localConfig.organic_preference * 100) }}%</span>
-        </div>
-        <p class="form-help">Higher values prefer organic products (may increase cost)</p>
+          Prefer Organic Products
+        </label>
+        <p class="form-help">When enabled, organic products will be preferred over conventional ones</p>
       </div>
 
       <div class="form-group">
@@ -190,8 +177,7 @@ const resetToDefault = () => {
     strategy: 'lowest_price',
     min_order_threshold: 0,
     delivery_priority: false,
-    quality_preference: 'standard',
-    organic_preference: 0.0,
+    organic_preference: false,
     preferred_vendor_ids: [],
     brand_preference: '',
     max_price_multiplier: 1.0

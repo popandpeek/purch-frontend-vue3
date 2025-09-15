@@ -1,5 +1,14 @@
 <template>
   <div class="inventory-management">
+    <!-- Order Creation Loading Overlay -->
+    <div v-if="creatingOrder" class="order-creation-overlay">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Creating Order...</h3>
+        <p>Please wait while we generate your order from inventory data.</p>
+      </div>
+    </div>
+
     <!-- Header -->
     <div class="page-header">
       <div class="header-content">
@@ -7,40 +16,77 @@
         <p class="subtitle">Monitor stock levels and manage inventory</p>
       </div>
       <div class="header-actions">
-        <button class="btn-primary" @click="refreshData" :disabled="loading">
-          <span>Refresh</span>
-        </button>
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          icon="↻" 
+          :disabled="loading"
+          @click="refreshData"
+        >
+          Refresh
+        </BaseButton>
         <div class="create-order-dropdown">
-          <button class="btn-primary" @click="showOrderOptions = !showOrderOptions" :disabled="loading">
+          <BaseButton 
+            variant="primary" 
+            size="md" 
+            icon="+" 
+            :disabled="loading || creatingOrder"
+            @click="showOrderOptions = !showOrderOptions"
+          >
             Create Order
-          </button>
+          </BaseButton>
           <div v-if="showOrderOptions" class="order-options">
-            <button class="option-btn" @click="createOrderForCategory('out-of-stock')">
+            <BaseButton 
+              variant="dropdown" 
+              size="md" 
+              @click="createOrderForCategory('out-of-stock')"
+            >
               Out of Stock Items
               <span class="option-count">({{ outOfStockCount }})</span>
-            </button>
-            <button class="option-btn" @click="createOrderForCategory('low-stock')">
+            </BaseButton>
+            <BaseButton 
+              variant="dropdown" 
+              size="md" 
+              @click="createOrderForCategory('low-stock')"
+            >
               Low Stock Items
               <span class="option-count">({{ lowStockCount }})</span>
-            </button>
-            <button class="option-btn" @click="createOrderForCategory('critical')">
+            </BaseButton>
+            <BaseButton 
+              variant="dropdown" 
+              size="md" 
+              @click="createOrderForCategory('critical')"
+            >
               Critical Stock Items
               <span class="option-count">({{ criticalStockCount }})</span>
-            </button>
-            <button class="option-btn" @click="createOrderForCategory('to-par')">
+            </BaseButton>
+            <BaseButton 
+              variant="dropdown" 
+              size="md" 
+              @click="createOrderForCategory('to-par')"
+            >
               Restock to Par Level
               <span class="option-count">({{ itemsNeedingRestock.length }})</span>
-            </button>
-            <button class="option-btn" @click="createOrderForCategory('selected')" :disabled="selectedItems.length === 0">
+            </BaseButton>
+            <BaseButton 
+              variant="dropdown" 
+              size="md" 
+              :disabled="selectedItems.length === 0"
+              @click="createOrderForCategory('selected')"
+            >
               <span class="option-icon">✅</span>
               Selected Items Only
               <span class="option-count">({{ selectedItems.length }})</span>
-            </button>
+            </BaseButton>
           </div>
         </div>
-        <button class="btn-secondary" @click="showBulkActions = !showBulkActions">
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          @click="showBulkActions = !showBulkActions"
+        >
           Bulk Actions
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -80,11 +126,28 @@
       <div class="bulk-actions-content">
         <span class="bulk-info">{{ selectedItems.length }} items selected</span>
         <div class="bulk-buttons">
-          <button class="btn-secondary" @click="selectAll">Select All</button>
-          <button class="btn-secondary" @click="clearSelection">Clear</button>
-          <button class="btn-primary" @click="bulkOrder" :disabled="selectedItems.length === 0">
+          <BaseButton 
+            variant="secondary" 
+            size="md" 
+            @click="selectAll"
+          >
+            Select All
+          </BaseButton>
+          <BaseButton 
+            variant="secondary" 
+            size="md" 
+            @click="clearSelection"
+          >
+            Clear
+          </BaseButton>
+          <BaseButton 
+            variant="primary" 
+            size="md" 
+            :disabled="selectedItems.length === 0"
+            @click="bulkOrder"
+          >
             Order Selected
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -191,7 +254,6 @@
           :class="{ selected: selectedItems.includes(item.id) }"
           @adjust-count="handleAdjustCount"
           @view-details="handleViewDetails"
-          @create-order="handleCreateOrder"
           @click="toggleSelection(item.id)"
         />
       </div>
@@ -238,16 +300,21 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHouseItemsStore } from '../../stores/house-items';
 import { useInventoriesStore } from '../../stores/inventories';
+import { useAuthStore } from '../../stores/auth';
+import httpClient from '../../http-common';
 import InventoryCard from '../../components/inventories/InventoryCard.vue';
 import InventoryRecordCard from '../../components/inventories/InventoryRecordCard.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import type { HouseItem, Inventory } from '../../api/model';
 
 const router = useRouter();
 const houseItemsStore = useHouseItemsStore();
 const inventoriesStore = useInventoriesStore();
+const authStore = useAuthStore();
 
 // Reactive state
 const loading = ref(false);
+const creatingOrder = ref(false);
 const searchQuery = ref('');
 const selectedCategory = ref<string | null>(null);
 const showLowStockOnly = ref(false);
@@ -383,7 +450,7 @@ const clearSelection = () => {
 
 const createOrderForCategory = async (category: string) => {
   showOrderOptions.value = false;
-  loading.value = true;
+  creatingOrder.value = true;
   
   try {
     let itemsToOrder: HouseItem[] = [];
@@ -416,38 +483,47 @@ const createOrderForCategory = async (category: string) => {
     }
     
     // Create the order with calculated quantities
-    const orderItems = itemsToOrder.map(item => ({
-      house_item_id: item.id,
-      quantity: calculateOrderQuantity(item),
-      notes: `Auto-generated from inventory management - ${category}`
-    }));
+    const orderItems = itemsToOrder.map(item => {
+      const quantity = calculateOrderQuantity(item);
+      console.log(`Item ${item.id} (${item.name}): current=${item.current_count}, par=${item.par_level}, quantity=${quantity}`);
+      return {
+        house_item_id: item.id,
+        quantity: quantity,
+        notes: `Auto-generated from inventory management - ${category}`
+      };
+    }).filter(item => item.quantity > 0); // Only include items with positive quantities
     
-    // Create the house order
-    const orderResponse = await fetch(`${(import.meta as any).env.VITE_API_URL || 'http://localhost:8000/api/v1'}/house-orders/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${await getAuthToken()}`,
-      },
-      body: JSON.stringify({
-        status: 'draft',
-        notes: `Auto-generated order for ${category} items from inventory management`,
-        items: orderItems
-      })
+    console.log('Order items to create:', orderItems);
+    
+    if (orderItems.length === 0) {
+      alert('No items need to be ordered (all items are at or above par level).');
+      return;
+    }
+    
+    // Create the house order using HTTP client
+    // Backend requires two-step process: create order first, then add items
+    const orderResponse = await httpClient.post('/house-orders/', {
+      status: 'draft',
+      notes: `Auto-generated order for ${category} items from inventory management`
     });
     
-    if (orderResponse.ok) {
-      const newOrder = await orderResponse.json();
-      // Navigate to the order detail page for review
-      router.push(`/orders/house/${newOrder.id}`);
-    } else {
-      throw new Error('Failed to create order');
+    // Add each item individually (backend doesn't support bulk item creation)
+    for (const item of orderItems) {
+      try {
+        await httpClient.post(`/house-orders/${orderResponse.data.id}/items/`, item);
+      } catch (itemError) {
+        console.error('Failed to add item:', item, itemError);
+        throw new Error(`Failed to add item ${item.house_item_id} to order`);
+      }
     }
+    
+    // Navigate to the order detail page for review
+    router.push(`/orders/house/${orderResponse.data.id}`);
   } catch (error) {
     console.error('Error creating order:', error);
     alert('Failed to create order. Please try again.');
   } finally {
-    loading.value = false;
+    creatingOrder.value = false;
   }
 };
 
@@ -462,24 +538,12 @@ const calculateOrderQuantity = (item: HouseItem): number => {
   return Math.ceil(needed * 1.1);
 };
 
-const getAuthToken = async (): Promise<string> => {
-  // This would typically come from your auth store
-  const token = localStorage.getItem('firebase_token');
-  if (!token) {
-    throw new Error('No auth token available');
-  }
-  return token;
-};
 
 const bulkOrder = () => {
   // TODO: Implement bulk ordering
   console.log('Bulk order for items:', selectedItems.value);
 };
 
-const handleCreateOrder = (item: HouseItem) => {
-  // Navigate to order creation with pre-selected item
-  router.push(`/orders/new?item=${item.id}`);
-};
 
 const handleAdjustCount = (item: HouseItem) => {
   // TODO: Open adjust count modal
@@ -571,6 +635,58 @@ onUnmounted(() => {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+}
+
+/* Order Creation Loading Overlay */
+.order-creation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+}
+
+.loading-content h3 {
+  margin: 1rem 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.loading-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3d008d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .page-header {
@@ -625,28 +741,6 @@ onUnmounted(() => {
   margin-top: 0.5rem;
 }
 
-.option-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: white;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 0.9rem;
-}
-
-.option-btn:hover:not(:disabled) {
-  background: #f8f9fa;
-}
-
-.option-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .option-icon {
   font-size: 1.1rem;
@@ -669,32 +763,6 @@ onUnmounted(() => {
   color: white;
 }
 
-.btn-primary, .btn-secondary {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #3498db;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #2980b9;
-}
-
-.btn-secondary {
-  background: #ecf0f1;
-  color: #2c3e50;
-}
-
-.btn-secondary:hover {
-  background: #d5dbdb;
-}
 
 .filters-section {
   background: white;

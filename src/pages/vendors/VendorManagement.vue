@@ -7,9 +7,14 @@
         <p>Manage vendor relationships and performance</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="createNewVendor">
+        <BaseButton 
+          variant="primary" 
+          size="md" 
+          icon="+" 
+          @click="createNewVendor"
+        >
           Add Vendor
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -62,9 +67,14 @@
           <option value="recent">Sort by Recent</option>
           <option value="spending">Sort by Spending</option>
         </select>
-        <button class="btn btn-outline" @click="refreshVendors">
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          icon="↻" 
+          @click="refreshVendors"
+        >
           Refresh
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -89,7 +99,74 @@
         @delete="deleteVendor"
         @order-history="viewVendorOrderHistory"
         @view-items="viewVendorItems"
+        @config="configureVendor"
       />
+    </div>
+
+    <!-- Configuration Modal -->
+    <div v-if="showConfigModal && selectedVendor" class="modal-overlay" @click="closeConfigModal">
+      <div class="modal-content large" @click.stop>
+        <div class="modal-header">
+          <h3>Configure {{ selectedVendor.name }}</h3>
+          <BaseButton variant="ghost" @click="closeConfigModal">
+            Close
+          </BaseButton>
+        </div>
+        <div class="modal-body">
+          <div class="vendor-config">
+            <h4>Vendor Configuration</h4>
+            <p class="config-description">
+              Configure vendor-specific preferences that affect how this vendor is selected.
+              These settings influence vendor selection algorithms when this vendor is considered.
+            </p>
+            
+            <div class="config-section">
+              <h5>Vendor Constraints</h5>
+              <div class="config-field">
+                <label>Minimum Order Threshold</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  v-model="vendorConfig.min_order_threshold"
+                />
+                <p class="field-description">Minimum order value required to use this vendor</p>
+              </div>
+              
+              <div class="config-field">
+                <label>Maximum Order Threshold</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  v-model="vendorConfig.max_order_threshold"
+                />
+                <p class="field-description">Maximum order value this vendor can handle (leave empty for no limit)</p>
+              </div>
+              
+              <div class="config-field">
+                <label>Preferred Categories</label>
+                <input 
+                  type="text" 
+                  v-model="vendorConfig.preferred_categories"
+                  placeholder="e.g., produce, dairy, meat"
+                />
+                <p class="field-description">Categories this vendor excels at (comma-separated)</p>
+              </div>
+            </div>
+
+
+            <div class="config-actions">
+              <BaseButton variant="primary" @click="saveVendorConfig" :loading="configSaving">
+                Save Vendor Configuration
+              </BaseButton>
+              <BaseButton variant="secondary" @click="resetVendorConfig">
+                Reset to Defaults
+              </BaseButton>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -99,7 +176,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useVendorStore } from '../../stores/vendors';
 import VendorCard from '../../components/vendors/VendorCard.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import type { Vendor } from '../../api/model';
+import type { ConfigInheritance } from '../../stores/house-orders';
 
 const router = useRouter();
 const vendorStore = useVendorStore();
@@ -109,9 +188,22 @@ const searchQuery = ref('');
 const statusFilter = ref('');
 const sortBy = ref<'name' | 'recent' | 'spending'>('name');
 const loading = ref(false);
+const showConfigModal = ref(false);
+const selectedVendor = ref<Vendor | null>(null);
+const configSaving = ref(false);
+
+// Configuration state
+const vendorConfig = ref({
+  min_order_threshold: 0,
+  max_order_threshold: null,
+  preferred_categories: ''
+});
+
+const configInheritance = ref<ConfigInheritance | null>(null);
 
 // Computed properties
 const vendors = computed(() => vendorStore.vendors);
+
 
 const filteredVendors = computed(() => {
   let filtered = vendors.value;
@@ -229,6 +321,20 @@ const viewVendorItems = (vendor: Vendor) => {
   router.push(`/items?vendor=${vendor.id}`);
 };
 
+const configureVendor = async (vendor: Vendor) => {
+  // Open inline configuration modal for vendor
+  selectedVendor.value = vendor;
+  showConfigModal.value = true;
+  
+  // TODO: Load configuration for this vendor
+  // try {
+  //   vendorConfig.value = await houseOrdersStore.getVendorSelectionConfig('item', vendor.id);
+  //   configInheritance.value = await houseOrdersStore.getConfigInheritance(vendor.id);
+  // } catch (error) {
+  //   console.error('Failed to load vendor configuration:', error);
+  // }
+};
+
 const refreshVendors = async () => {
   loading.value = true;
   try {
@@ -236,6 +342,36 @@ const refreshVendors = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Configuration methods
+const closeConfigModal = () => {
+  showConfigModal.value = false;
+  selectedVendor.value = null;
+  configInheritance.value = null;
+};
+
+const saveVendorConfig = async () => {
+  if (!selectedVendor.value) return;
+  
+  configSaving.value = true;
+  try {
+    // TODO: Implement vendor configuration save API
+    // await houseOrdersStore.updateVendorSelectionConfig('item', selectedVendor.value.id, vendorConfig.value);
+    showConfigModal.value = false;
+  } catch (error) {
+    console.error('Failed to save vendor configuration:', error);
+  } finally {
+    configSaving.value = false;
+  }
+};
+
+const resetVendorConfig = () => {
+  vendorConfig.value = {
+    min_order_threshold: 0,
+    max_order_threshold: null,
+    preferred_categories: ''
+  };
 };
 
 // Lifecycle
@@ -431,42 +567,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2a0063;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: white;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover {
-  background: #f8f9fa;
-}
-
-.btn-icon {
-  font-size: 1rem;
-}
 
 @media (max-width: 768px) {
   .vendor-management {
@@ -496,5 +596,190 @@ onMounted(async () => {
   .vendor-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Configuration Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content.large {
+  max-width: 1000px;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.vendor-config,
+.product-config {
+  margin-bottom: 1rem;
+}
+
+.vendor-config h4,
+.product-config h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.config-description {
+  margin: 0 0 1.5rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Vendor Configuration Styles */
+.vendor-config {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.vendor-config h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.config-section {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.config-section h5 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.config-field {
+  margin-bottom: 1rem;
+}
+
+.config-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.config-field select,
+.config-field input[type="text"],
+.config-field input[type="number"],
+.config-field input[type="range"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.config-field input[type="range"] {
+  padding: 0;
+  height: 6px;
+  background: #e9ecef;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.config-field input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-value {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  color: #007bff;
+  min-width: 30px;
+}
+
+.field-description {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.config-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 </style>

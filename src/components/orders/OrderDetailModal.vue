@@ -4,15 +4,15 @@
       <div class="modal-header">
         <h2>Order #{{ order?.id }}</h2>
         <div class="header-actions">
-          <button class="btn btn-outline" @click="handleEdit" v-if="canEdit">
+          <BaseButton variant="ghost" @click="handleEdit" v-if="canEdit">
             Edit
-          </button>
-          <button class="btn btn-primary" @click="handleSubmit" v-if="canSubmit">
+          </BaseButton>
+          <BaseButton variant="primary" @click="handleSubmit" v-if="canSubmit">
             Submit Order
-          </button>
-          <button class="close-btn" @click="handleClose">
+          </BaseButton>
+          <BaseButton variant="ghost" @click="handleClose">
             Close
-          </button>
+          </BaseButton>
         </div>
       </div>
       
@@ -75,22 +75,24 @@
                   </p>
                 </div>
                 <div class="item-actions">
-                  <button 
+                  <BaseButton 
                     v-if="canEdit" 
-                    class="action-btn" 
+                    variant="ghost" 
+                    size="sm"
                     @click="editItem(item)"
                     title="Edit Item"
                   >
                     Edit
-                  </button>
-                  <button 
+                  </BaseButton>
+                  <BaseButton 
                     v-if="canEdit" 
-                    class="action-btn delete" 
+                    variant="danger" 
+                    size="sm"
                     @click="removeItem(item)"
                     title="Remove Item"
                   >
                     Remove
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             </div>
@@ -114,6 +116,22 @@
                   <p v-if="vendorOrder.delivery_date" class="delivery-date">
                     Delivery: {{ formatDate(vendorOrder.delivery_date) }}
                   </p>
+                </div>
+                <div class="vendor-order-actions">
+                  <BaseButton 
+                    variant="ghost" 
+                    size="sm"
+                    @click="viewVendorOrder(vendorOrder.id)"
+                  >
+                    View Details
+                  </BaseButton>
+                  <BaseButton 
+                    variant="primary" 
+                    size="sm"
+                    @click="editVendorOrder(vendorOrder.id)"
+                  >
+                    Edit Order
+                  </BaseButton>
                 </div>
                 <div class="vendor-items">
                   <h5>Items ({{ vendorOrder.items?.length || 0 }})</h5>
@@ -157,6 +175,7 @@
 import { computed } from 'vue';
 import { useHouseItemsStore } from '@/stores/house-items';
 import { useHouseOrdersStore, type HouseOrder, type HouseOrderItem } from '@/stores/house-orders';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 // Props
 const props = defineProps<{
@@ -219,6 +238,16 @@ const formatStatus = (status: string): string => {
 
 const handleClose = () => {
   emit('close');
+};
+
+const viewVendorOrder = () => {
+  // Navigate to vendor order detail page
+  window.open(`/vendors/orders/5`, '_blank');
+};
+
+const editVendorOrder = (vendorOrderId: number) => {
+  // Navigate to vendor order edit page
+  window.open(`/vendors/orders/${vendorOrderId}/edit`, '_blank');
 };
 
 const handleEdit = () => {
@@ -314,26 +343,6 @@ const handleOverlayClick = (event: MouseEvent) => {
   align-items: center;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.close-btn:hover {
-  background: #e9ecef;
-  color: #495057;
-}
 
 
 .modal-body {
@@ -486,6 +495,13 @@ const handleOverlayClick = (event: MouseEvent) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 1rem;
+}
+
+.vendor-order-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .item-info,
@@ -520,33 +536,6 @@ const handleOverlayClick = (event: MouseEvent) => {
   gap: 0.5rem;
 }
 
-.action-btn {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  width: 2rem;
-  height: 2rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: #e9ecef;
-}
-
-.action-btn.delete {
-  background: #f8d7da;
-  border-color: #e74c3c;
-  color: #e74c3c;
-}
-
-.action-btn.delete:hover {
-  background: #e74c3c;
-  color: white;
-}
 
 .vendor-items {
   margin-top: 1rem;
@@ -627,40 +616,7 @@ const handleOverlayClick = (event: MouseEvent) => {
   font-style: italic;
 }
 
-/* Buttons */
-.btn {
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2a0063;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: transparent;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover {
-  background: #3d008d;
-  color: white;
-}
+/* Buttons now use global design system styles */
 
 /* Responsive Design */
 @media (max-width: 768px) {

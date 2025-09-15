@@ -106,8 +106,13 @@ const handleLogout = async () => {
 
 <style scoped>
 .mobile-nav {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1000;
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #ecf0f1;
 }
 
 .hamburger {

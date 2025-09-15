@@ -1,12 +1,37 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import instance from '@/http-common';
+import type { HouseItem } from '@/api/model';
+
+export interface VendorOrderBreakdown {
+  id: number;
+  house_order_item_id: number;
+  vendor_order_id: number;
+  vendor_item_id: number;
+  quantity: number;
+  unit_price: string;
+  total_price: string;
+  vendor_item_name: string;
+  vendor_item_sku: string;
+  vendor_item_description: string;
+  case_size: number;
+  pack_size: number;
+  pack_unit: string;
+  case_weight: string;
+  case_weight_unit: string;
+  price_per_case: string;
+  price_per_unit: string;
+  total_units: number;
+}
 
 export interface HouseOrderItem {
-  id?: number;
+  id: number;
+  house_order_id: number;
   house_item_id: number;
   quantity: number;
-  priority: 'low' | 'normal' | 'high';
+  priority: 'high' | 'normal' | 'low';
+  house_item: HouseItem | null; // Populated house item details
+  vendor_breakdowns: VendorOrderBreakdown[];
   vendor_selection_config?: VendorSelectionConfig;
 }
 
@@ -104,8 +129,7 @@ export interface VendorSelectionConfig {
   strategy: 'lowest_price' | 'best_value' | 'preferred_vendor' | 'delivery_optimization';
   min_order_threshold: number;
   delivery_priority: boolean;
-  quality_preference: 'premium' | 'standard' | 'budget';
-  organic_preference: number; // 0.0 to 1.0
+  organic_preference: boolean; // true = prefer organic, false = no preference
   preferred_vendor_ids: number[];
   brand_preference: string;
   max_price_multiplier: number;
@@ -176,8 +200,18 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
     error.value = null;
     try {
       const response = await instance.get(`/house-orders/${id}`);
-      currentOrder.value = transformOrderData(response.data);
-      return currentOrder.value;
+      const transformedOrder = transformOrderData(response.data);
+      currentOrder.value = transformedOrder;
+      
+      // Also add to orders array if not already present
+      const existingIndex = orders.value.findIndex(order => order.id === id);
+      if (existingIndex === -1) {
+        orders.value.push(transformedOrder);
+      } else {
+        orders.value[existingIndex] = transformedOrder;
+      }
+      
+      return transformedOrder;
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch order';
       console.error('Error fetching order:', err);
@@ -409,6 +443,17 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
       } : null
     }));
     
+    // Transform house order items
+    const houseOrderItems = (order.items || order[8] || []).map((item: any) => ({
+      id: item.id,
+      house_order_id: Number(id),
+      house_item_id: item.house_item_id,
+      quantity: item.quantity || 0,
+      priority: item.priority || 'normal',
+      house_item: item.house_item || null,
+      vendor_breakdowns: item.vendor_breakdowns || []
+    }));
+
     return {
       id: Number(id),
       date: order.date || order[1],
@@ -417,7 +462,7 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
       notes: order.notes || order[4] || '',
       created_at: order.created_at || order[6],
       updated_at: order.updated_at || order[7],
-      items: order.items || order[8] || [],
+      items: houseOrderItems,
       vendor_orders: vendorOrders,
       vendor_selection_config: order.vendor_selection_config || order[10] || getDefaultVendorSelectionConfig()
     };
@@ -502,17 +547,93 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
     }
   };
 
+  const getVendorSelectionConfig = async (
+    level: 'system' | 'order' | 'item' | 'order_item',
+    id: number
+  ): Promise<VendorSelectionConfig> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await instance.get(`/vendor-selection-config/${level}/${id}`);
+      return response.data;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to fetch vendor selection config';
+      console.error('Error fetching vendor selection config:', err);
+      // Return default config if not found
+      return getDefaultVendorSelectionConfig();
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const getDefaultVendorSelectionConfig = (): VendorSelectionConfig => {
     return {
       strategy: 'lowest_price',
       min_order_threshold: 0,
       delivery_priority: false,
-      quality_preference: 'standard',
-      organic_preference: 0.0,
+      organic_preference: false,
       preferred_vendor_ids: [],
       brand_preference: '',
       max_price_multiplier: 1.0
     };
+  };
+
+  const generateVendorBreakdown = async (orderId: number): Promise<void> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      // Step 1: Get vendor selections for all items in the order
+      const vendorSelections = await getVendorSelections(orderId);
+      
+      // Step 2: Group selections by vendor
+      const vendorGroups = new Map<number, any[]>();
+      vendorSelections.forEach(selection => {
+        const vendorId = selection.vendor_item.vendor_id;
+        if (!vendorGroups.has(vendorId)) {
+          vendorGroups.set(vendorId, []);
+        }
+        vendorGroups.get(vendorId)!.push(selection);
+      });
+
+      // Step 3: Create vendor orders for each vendor
+      const createdVendorOrders = [];
+      for (const [vendorId, selections] of vendorGroups) {
+        try {
+          // Create vendor order
+          const vendorOrderResponse = await instance.post('/vendor-orders/', {
+            house_order_id: orderId,
+            vendor_id: vendorId,
+            status: 'draft',
+            notes: `Auto-generated from house order #${orderId}`
+          });
+
+          // Add items to vendor order
+          for (const selection of selections) {
+            await instance.post(`/vendor-orders/${vendorOrderResponse.data.id}/items/`, {
+              vendor_item_id: selection.vendor_item.id,
+              quantity: selection.quantity, // Use the quantity from the house order item
+              unit_price: selection.vendor_item.price_per_unit,
+              total_price: (parseFloat(selection.vendor_item.price_per_unit) * selection.quantity).toFixed(2)
+            });
+          }
+          
+          // Store the created vendor order for later reference
+          createdVendorOrders.push(vendorOrderResponse.data);
+        } catch (vendorError) {
+          console.error(`Failed to create vendor order for vendor ${vendorId}:`, vendorError);
+        }
+      }
+
+      // Step 4: Refresh the order to get updated vendor orders
+      await fetchOrderById(orderId);
+      
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Failed to generate vendor breakdown';
+      console.error('Error generating vendor breakdown:', err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
   };
 
   return {
@@ -548,6 +669,8 @@ export const useHouseOrdersStore = defineStore('houseOrders', () => {
     overrideVendorSelection,
     getConfigInheritance,
     updateVendorSelectionConfig,
-    getDefaultVendorSelectionConfig
+    getVendorSelectionConfig,
+    getDefaultVendorSelectionConfig,
+    generateVendorBreakdown
   };
 });

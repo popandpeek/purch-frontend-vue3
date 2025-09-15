@@ -80,6 +80,9 @@ const handleLogout = async () => {
 
 <style scoped>
 .desktop-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;

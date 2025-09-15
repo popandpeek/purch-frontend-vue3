@@ -1,20 +1,29 @@
 <template>
   <div class="house-order-management">
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="page-header">
       <div class="header-content">
-        <h1 class="page-title">House Order Management</h1>
-        <p class="page-subtitle">Create and manage house orders for vendor optimization</p>
+        <h1>House Order Management</h1>
+        <p>Create and manage house orders for vendor optimization</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="showCreateForm">
-          <span class="btn-icon">+</span>
+        <BaseButton 
+          variant="primary" 
+          size="md" 
+          icon="+" 
+          @click="showCreateForm"
+        >
           New Order
-        </button>
-        <button class="btn btn-secondary" @click="refreshData" :disabled="loading">
-          <span class="btn-icon">↻</span>
+        </BaseButton>
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          icon="↻" 
+          :disabled="loading"
+          @click="refreshData"
+        >
           Refresh
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -87,11 +96,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useHouseOrdersStore, type HouseOrder } from '@/stores/house-orders';
 import OrderList from '@/components/orders/OrderList.vue';
 import OrderFormModal from '@/components/orders/OrderFormModal.vue';
 import OrderDetailModal from '@/components/orders/OrderDetailModal.vue';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 // Router (unused but kept for future use)
 // const router = useRouter();
@@ -171,22 +180,25 @@ onMounted(async () => {
   padding: 2rem;
 }
 
-/* Page Header */
 .page-header {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ecf0f1;
 }
 
-.header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.header-content h1 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 2rem;
+}
+
+.header-content p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1rem;
 }
 
 .page-title {
@@ -267,51 +279,7 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #2a0063;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(61, 0, 141, 0.3);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #5a6268;
-  transform: translateY(-1px);
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-icon {
-  font-size: 1.1rem;
-  font-weight: bold;
-}
+/* Buttons now use design system classes */
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -321,12 +289,8 @@ onMounted(async () => {
   
   .page-header {
     flex-direction: column;
-    gap: 1.5rem;
-    align-items: stretch;
-  }
-  
-  .header-actions {
-    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
   }
   
   .stats-grid {
@@ -352,9 +316,5 @@ onMounted(async () => {
     flex-direction: column;
   }
   
-  .btn {
-    width: 100%;
-    justify-content: center;
-  }
 }
 </style>

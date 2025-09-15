@@ -51,5 +51,29 @@ export const useVendorStore = defineStore({
         this.loading = false;
       }
     },
+    async updateVendor(id: number, vendorData: any) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await instance.put(`/vendors/${id}/`, vendorData);
+        const updatedVendor = response.data;
+        
+        // Update the vendor in the local store
+        const existingIndex = this.vendors.findIndex(v => v.id === id);
+        if (existingIndex >= 0) {
+          this.vendors[existingIndex] = updatedVendor;
+        } else {
+          this.vendors.push(updatedVendor);
+        }
+        
+        return updatedVendor;
+      } catch (error: any) {
+        this.error = error.message || 'Failed to update vendor';
+        console.error('Error updating vendor:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

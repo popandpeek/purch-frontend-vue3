@@ -50,6 +50,9 @@
         <button class="action-btn edit" @click="handleView">
           Edit
         </button>
+        <button class="action-btn config" @click="handleConfig" title="Configure vendor settings">
+          Configure
+        </button>
         <button class="action-btn items" @click="handleViewItems">
           Items
         </button>
@@ -63,7 +66,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import type { Vendor } from '../../api/model';
 
 interface Props {
@@ -78,9 +80,8 @@ const emit = defineEmits<{
   delete: [vendor: Vendor];
   'order-history': [vendor: Vendor];
   'view-items': [vendor: Vendor];
+  config: [vendor: Vendor];
 }>();
-
-const router = useRouter();
 
 // Computed properties
 const contactName = computed(() => {
@@ -128,6 +129,10 @@ const handleView = () => {
 
 const handleEdit = () => {
   emit('edit', props.vendor);
+};
+
+const handleConfig = () => {
+  emit('config', props.vendor);
 };
 
 const handleOrderHistory = () => {
@@ -318,6 +323,12 @@ const handleViewItems = () => {
   background: #d4edda;
   border-color: #27ae60;
   color: #27ae60;
+}
+
+.action-btn.config:hover {
+  background: #f0f8ff;
+  border-color: #3d008d;
+  color: #3d008d;
 }
 
 .btn-icon {

@@ -91,6 +91,59 @@
         </div>
       </div>
 
+      <!-- Delivery Information -->
+      <div class="section">
+        <h3>Delivery Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Delivery Days</label>
+            <div class="checkbox-group">
+              <label v-for="day in deliveryDays" :key="day.value" class="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  :value="day.value" 
+                  v-model="editData.delivery_days"
+                  class="checkbox-input"
+                >
+                <span class="checkbox-text">{{ day.label }}</span>
+              </label>
+            </div>
+            <p class="form-help">Select the days this vendor delivers</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Order Cut-off Time (for next day delivery)</label>
+            <input 
+              v-model="editData.order_cutoff_time" 
+              type="time" 
+              :class="['form-input', { 'input-error': !isCutoffTimeValid }]"
+              placeholder="14:00"
+            >
+            <p class="form-help">Time by which orders must be placed for next day delivery (24-hour format)</p>
+            <p v-if="!isCutoffTimeValid" class="form-error">Please enter a valid time in HH:MM format (24-hour)</p>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                v-model="editData.is_active"
+                class="checkbox-input"
+              >
+              <span class="checkbox-text">Active Vendor</span>
+            </label>
+            <p class="form-help">Enable or disable this vendor for ordering</p>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Delivery Notes</label>
+            <textarea 
+              v-model="editData.delivery_notes" 
+              class="form-textarea" 
+              rows="3" 
+              placeholder="Special delivery instructions, restrictions, or notes"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
       <!-- Status & Settings -->
       <div class="section">
         <h3>Status & Settings</h3>
@@ -124,6 +177,31 @@
         </div>
       </div>
 
+      <!-- Delivery Summary -->
+      <div class="section">
+        <h3>Delivery Summary</h3>
+        <div class="delivery-summary">
+          <div class="summary-item">
+            <strong>Order Cutoff:</strong> {{ formatCutoffTime(editData.order_cutoff_time) }}
+          </div>
+          <div class="summary-item">
+            <strong>Delivery Days:</strong> {{ formatDeliveryDays(editData.delivery_days) }}
+          </div>
+          <div class="summary-item">
+            <strong>Status:</strong> 
+            <span :class="['status-badge', editData.is_active ? 'active' : 'inactive']">
+              {{ editData.is_active ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <div v-if="editData.order_cutoff_time && editData.is_active" class="summary-item">
+            <strong>Next Day Ordering:</strong> 
+            <span :class="['order-status', canOrderForNextDay(editData) ? 'available' : 'unavailable']">
+              {{ canOrderForNextDay(editData) ? 'Available' : 'Cutoff Passed' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Quick Actions -->
       <div class="section">
         <h3>Quick Actions</h3>
@@ -147,11 +225,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useVendorStore } from '../../../stores/vendors';
 import EditPage from '../../EditPage.vue';
 import type { Vendor } from '../../../api/model';
+import instance from '../../../http-common';
 
 const route = useRoute();
 const router = useRouter();
@@ -180,12 +259,68 @@ const editData = ref({
   credit_limit: '',
   preferred_contact_method: '',
   
+  // Delivery Information (matching guide specification)
+  delivery_days: [] as number[],
+  order_cutoff_time: '',
+  is_active: true,
+  delivery_notes: '',
+  
   // Status & Settings
   status: 'active',
   priority: 'medium',
   contract_start_date: '',
   contract_end_date: ''
 });
+
+// Delivery days options (matching guide: 0=Monday, 6=Sunday)
+const deliveryDays = [
+  { value: 0, label: 'Monday' },
+  { value: 1, label: 'Tuesday' },
+  { value: 2, label: 'Wednesday' },
+  { value: 3, label: 'Thursday' },
+  { value: 4, label: 'Friday' },
+  { value: 5, label: 'Saturday' },
+  { value: 6, label: 'Sunday' }
+];
+
+// Validation
+const isCutoffTimeValid = computed(() => {
+  if (!editData.value.order_cutoff_time) return true; // Optional field
+  const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  return timeRegex.test(editData.value.order_cutoff_time);
+});
+
+const hasDeliveryDays = computed(() => {
+  return editData.value.delivery_days.length > 0;
+});
+
+// Utility functions (from guide)
+const formatDeliveryDays = (days: number[] | null): string => {
+  if (!days || days.length === 0) return 'Not set';
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  return days.map(day => dayNames[day]).join(', ');
+};
+
+const formatCutoffTime = (time: string | null): string => {
+  if (!time) return 'Not set';
+  const [hours, minutes] = time.split(':');
+  const date = new Date();
+  date.setHours(parseInt(hours), parseInt(minutes));
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+const canOrderForNextDay = (vendor: any): boolean => {
+  if (!vendor.order_cutoff_time || !vendor.is_active) return false;
+  const now = new Date();
+  const [cutoffHours, cutoffMinutes] = vendor.order_cutoff_time.split(':');
+  const cutoffTime = new Date();
+  cutoffTime.setHours(parseInt(cutoffHours), parseInt(cutoffMinutes));
+  return now < cutoffTime;
+};
 
 const loadVendor = async () => {
   loading.value = true;
@@ -215,6 +350,12 @@ const loadVendor = async () => {
       credit_limit: (vendorData as any).credit_limit || '',
       preferred_contact_method: (vendorData as any).preferred_contact_method || '',
       
+      // Delivery fields (matching guide specification)
+      delivery_days: vendorData.delivery_days || [],
+      order_cutoff_time: vendorData.order_cutoff_time || '',
+      is_active: vendorData.is_active ?? true,
+      delivery_notes: vendorData.delivery_notes || '',
+      
       // Status fields
       status: (vendorData as any).status || 'active',
       priority: (vendorData as any).priority || 'medium',
@@ -231,12 +372,63 @@ const loadVendor = async () => {
 const saveChanges = async () => {
   if (!vendor.value) return;
   
+  // Validate delivery information
+  if (!isCutoffTimeValid.value) {
+    alert('Please fix the cut-off time format before saving.');
+    return;
+  }
+  
+  if (editData.value.order_cutoff_time && !hasDeliveryDays.value) {
+    alert('Please select at least one delivery day if you specify a cut-off time.');
+    return;
+  }
+  
   try {
-    // TODO: Implement save functionality
-    console.log('Saving vendor changes:', editData.value);
+    // Prepare the data for saving
+    const updateData = {
+      name: editData.value.name,
+      contact_first_name: editData.value.contact_first_name,
+      contact_last_name: editData.value.contact_last_name,
+      contact_email: editData.value.contact_email,
+      phone: editData.value.phone,
+      // Delivery information
+      order_cutoff_time: editData.value.order_cutoff_time || null,
+      delivery_days: editData.value.delivery_days.length > 0 ? editData.value.delivery_days : null,
+      is_active: editData.value.is_active,
+      delivery_notes: editData.value.delivery_notes || null,
+      // Additional fields
+      website: editData.value.website || null,
+      address: editData.value.address || null,
+      notes: editData.value.notes || null,
+      // Business fields
+      tax_id: editData.value.tax_id || null,
+      payment_terms: editData.value.payment_terms || null,
+      credit_limit: editData.value.credit_limit || null,
+      preferred_contact_method: editData.value.preferred_contact_method || null,
+      // Status fields
+      status: editData.value.status,
+      priority: editData.value.priority,
+      contract_start_date: editData.value.contract_start_date || null,
+      contract_end_date: editData.value.contract_end_date || null
+    };
+
+    // Call the API directly to update the vendor
+    const response = await instance.put(`/vendors/${vendor.value.id}/`, updateData);
+    const updatedVendor = response.data;
+    
+    // Update the vendor in the store
+    const existingIndex = vendorStore.vendors.findIndex(v => v.id === vendor.value!.id);
+    if (existingIndex >= 0) {
+      vendorStore.vendors[existingIndex] = updatedVendor;
+    }
+    
+    // Update the local vendor reference
+    vendor.value = updatedVendor;
+    
     alert('Vendor updated successfully!');
   } catch (err: any) {
-    alert('Failed to save changes: ' + err.message);
+    console.error('Failed to save vendor changes:', err);
+    alert('Failed to save changes: ' + (err.message || 'Unknown error'));
   }
 };
 
@@ -294,6 +486,10 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
 .form-label {
   font-size: 0.9rem;
   color: #2c3e50;
@@ -345,6 +541,121 @@ onMounted(() => {
   outline: none;
   border-color: #3d008d;
   box-shadow: 0 0 0 3px rgba(61, 0, 141, 0.1);
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.checkbox-label:hover {
+  background-color: #f8f9fa;
+}
+
+.checkbox-input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.form-help {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: #dc3545;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.input-error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+}
+
+.delivery-summary {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.summary-item:last-child {
+  margin-bottom: 0;
+}
+
+.summary-item strong {
+  min-width: 140px;
+  color: #495057;
+  margin-right: 0.5rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge.inactive {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.order-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.order-status.available {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
+.order-status.unavailable {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
 }
 
 .action-buttons {

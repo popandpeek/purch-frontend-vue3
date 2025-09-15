@@ -6,16 +6,6 @@
         <h2>House Orders</h2>
         <p>{{ totalOrders }} orders total</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-primary" @click="createNewOrder">
-          <span class="btn-icon">+</span>
-          New Order
-        </button>
-        <button class="btn btn-secondary" @click="refreshOrders" :disabled="loading">
-          <span class="btn-icon">↻</span>
-          Refresh
-        </button>
-      </div>
     </div>
 
     <!-- Filters -->
@@ -64,7 +54,7 @@
     <div v-else-if="error" class="error-state">
       <h3>Error</h3>
       <p>{{ error }}</p>
-      <button class="btn btn-primary" @click="refreshOrders">Retry</button>
+      <BaseButton variant="primary" @click="refreshOrders">Retry</BaseButton>
     </div>
 
     <!-- Empty State -->
@@ -77,9 +67,9 @@
       <p v-else>
         Create your first order to get started
       </p>
-      <button class="btn btn-primary" @click="createNewOrder">
+      <BaseButton variant="primary" @click="createNewOrder">
         Create First Order
-      </button>
+      </BaseButton>
     </div>
 
     <!-- Orders List -->
@@ -97,39 +87,43 @@
 
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="pagination">
-      <button
-        class="btn btn-outline"
+      <BaseButton
+        variant="ghost"
+        size="sm"
         :disabled="currentPage === 1"
         @click="currentPage = 1"
       >
         First
-      </button>
-      <button
-        class="btn btn-outline"
+      </BaseButton>
+      <BaseButton
+        variant="ghost"
+        size="sm"
         :disabled="currentPage === 1"
         @click="currentPage--"
       >
         Previous
-      </button>
+      </BaseButton>
       
       <span class="page-info">
         Page {{ currentPage }} of {{ totalPages }}
       </span>
       
-      <button
-        class="btn btn-outline"
+      <BaseButton
+        variant="ghost"
+        size="sm"
         :disabled="currentPage === totalPages"
         @click="currentPage++"
       >
         Next
-      </button>
-      <button
-        class="btn btn-outline"
+      </BaseButton>
+      <BaseButton
+        variant="ghost"
+        size="sm"
         :disabled="currentPage === totalPages"
         @click="currentPage = totalPages"
       >
         Last
-      </button>
+      </BaseButton>
     </div>
   </div>
 </template>
@@ -138,6 +132,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useHouseOrdersStore, type HouseOrder } from '@/stores/house-orders';
 import OrderCard from './OrderCard.vue';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 // Store
 const orderStore = useHouseOrdersStore();
@@ -389,7 +384,7 @@ onMounted(async () => {
 
 .orders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 1.5rem;
 }
 
@@ -410,63 +405,16 @@ onMounted(async () => {
   padding: 0 1rem;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #2a0063;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(61, 0, 141, 0.3);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #5a6268;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: transparent;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover:not(:disabled) {
-  background: #3d008d;
-  color: white;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-icon {
-  font-size: 1rem;
-  font-weight: bold;
-}
+/* Buttons now use design system classes */
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .orders-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .list-header {
     flex-direction: column;
@@ -488,6 +436,7 @@ onMounted(async () => {
   
   .orders-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .pagination {

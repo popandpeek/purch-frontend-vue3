@@ -7,9 +7,14 @@
         <p>Manage vendor invoices and payments</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="createNewInvoice">
+        <BaseButton 
+          variant="primary" 
+          size="md" 
+          icon="+" 
+          @click="createNewInvoice"
+        >
           Add Invoice
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -106,9 +111,14 @@
           <option value="vendor">Sort by Vendor</option>
           <option value="status">Sort by Status</option>
         </select>
-        <button class="btn btn-outline" @click="refreshInvoices">
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          icon="↻" 
+          @click="refreshInvoices"
+        >
           Refresh
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -143,6 +153,7 @@ import { useRouter } from 'vue-router';
 import { useInvoiceStore } from '../../stores/vendor-invoices';
 import { useVendorStore } from '../../stores/vendors';
 import InvoiceCard from '../../components/invoices/InvoiceCard.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import type { VendorInvoice, Vendor } from '../../api/model';
 
 const router = useRouter();
@@ -529,42 +540,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2a0063;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: white;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover {
-  background: #f8f9fa;
-}
-
-.btn-icon {
-  font-size: 1rem;
-}
 
 @media (max-width: 768px) {
   .invoice-management {

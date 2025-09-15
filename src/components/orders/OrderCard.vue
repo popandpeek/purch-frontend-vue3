@@ -11,33 +11,41 @@
         </div>
       </div>
       <div class="order-actions">
-        <button class="action-btn" @click="handleView" title="View Order">
+        <BaseButton 
+          variant="ghost" 
+          size="sm" 
+          @click="handleView" 
+          title="View Order"
+        >
           View
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           v-if="canEdit" 
-          class="action-btn" 
+          variant="secondary" 
+          size="sm" 
           @click="handleEdit" 
           title="Edit Order"
         >
           Edit
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           v-if="canSubmit" 
-          class="action-btn submit" 
+          variant="primary" 
+          size="sm" 
           @click="handleSubmit" 
           title="Submit Order"
         >
           Submit
-        </button>
-        <button 
+        </BaseButton>
+        <BaseButton 
           v-if="canDelete" 
-          class="action-btn delete" 
+          variant="danger" 
+          size="sm" 
           @click="handleDelete" 
           title="Delete Order"
         >
           Delete
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -118,6 +126,7 @@
 import { computed } from 'vue';
 import { useHouseItemsStore } from '@/stores/house-items';
 import type { HouseOrder } from '@/stores/house-orders';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 // Props
 const props = defineProps<{
@@ -303,51 +312,79 @@ const handleDelete = () => {
 
 .order-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.action-btn {
-  background: #f8f9fa;
+/* Uniform button styling for OrderCard */
+.order-actions button {
+  padding: 0.375rem 0.75rem;
   border: 1px solid #e9ecef;
   border-radius: 6px;
-  width: 2.5rem;
-  height: 2.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
-  display: flex;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  min-height: 1.75rem;
+  background: #f8f9fa;
+  color: #6c757d;
+  white-space: nowrap;
 }
 
-.action-btn:hover {
-  background: #e9ecef;
+.order-actions button:hover {
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #e9ecef;
+  color: #495057;
 }
 
-.action-btn.submit {
-  background: #e8f4fd;
-  border-color: #3d008d;
-  color: #3d008d;
+/* Specific button variants */
+.order-actions button[data-variant="ghost"] {
+  background: transparent;
+  color: #6c757d;
+  border-color: #e9ecef;
 }
 
-.action-btn.submit:hover {
+.order-actions button[data-variant="ghost"]:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.order-actions button[data-variant="secondary"] {
+  background: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+
+.order-actions button[data-variant="secondary"]:hover {
+  background: #5a6268;
+  border-color: #5a6268;
+}
+
+.order-actions button[data-variant="primary"] {
   background: #3d008d;
   color: white;
+  border-color: #3d008d;
 }
 
-.action-btn.delete {
-  background: #f8d7da;
-  border-color: #e74c3c;
-  color: #e74c3c;
+.order-actions button[data-variant="primary"]:hover {
+  background: #270041;
+  border-color: #270041;
 }
 
-.action-btn.delete:hover {
-  background: #e74c3c;
+.order-actions button[data-variant="danger"] {
+  background: #dc3545;
   color: white;
+  border-color: #dc3545;
 }
 
-.btn-icon {
-  font-size: 1rem;
+.order-actions button[data-variant="danger"]:hover {
+  background: #c82333;
+  border-color: #bd2130;
 }
 
 .card-content {

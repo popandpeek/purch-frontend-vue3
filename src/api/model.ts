@@ -98,7 +98,12 @@ export interface Vendor {
     contact_last_name: string,
     contact_email: string,
     phone: string,
-    items: Array<VendorItem>
+    items: Array<VendorItem>,
+    // Delivery Information (matching guide specification)
+    order_cutoff_time?: string | null, // Format: "HH:MM" (24-hour)
+    delivery_days?: number[] | null,   // Array of days (0=Monday, 6=Sunday)
+    is_active?: boolean,               // Vendor active status
+    delivery_notes?: string            // Additional delivery information
 }
 
 export interface VendorOrder {

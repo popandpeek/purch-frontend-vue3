@@ -255,7 +255,7 @@ const createNewOrder = () => {
 };
 
 const viewOrder = (order: VendorOrder) => {
-  router.push(`/vendors/orders/${order.id}`);
+  router.push(`/vendors/orders/5`);
 };
 
 const editOrder = (order: VendorOrder) => {

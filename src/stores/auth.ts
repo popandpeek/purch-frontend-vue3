@@ -103,6 +103,10 @@ export const useAuthStore = defineStore('auth', {
         this.isAuthenticated = false;
         this.error = null;
         
+        // Clear token from localStorage
+        localStorage.removeItem('authToken');
+        console.log('✅ Token removed from localStorage on logout');
+        
         // Clear token refresh interval
         if (this.tokenRefreshInterval) {
           clearInterval(this.tokenRefreshInterval);
@@ -226,8 +230,10 @@ export const useAuthStore = defineStore('auth', {
         if (this.firebaseUser) {
           try {
             // Just get the token (Firebase will refresh if needed)
-            await this.firebaseUser.getIdToken();
-            console.log('✅ Token refreshed successfully');
+            const token = await this.firebaseUser.getIdToken();
+            // Update localStorage with the new token
+            localStorage.setItem('authToken', token);
+            console.log('✅ Token refreshed successfully and stored in localStorage');
           } catch (error) {
             console.error('Token refresh failed:', error);
             // Don't logout immediately - let the response interceptor handle 401s
@@ -237,8 +243,38 @@ export const useAuthStore = defineStore('auth', {
       }, 55 * 60 * 1000); // 55 minutes
     },
 
+    // Check if token is expired
+    isTokenExpired(token: string): boolean {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+      } catch {
+        return true;
+      }
+    },
+
+    // Check if user should remain authenticated (for multi-tab scenarios)
+    shouldRemainAuthenticated(): boolean {
+      const storedToken = localStorage.getItem('authToken');
+      if (!storedToken || this.isTokenExpired(storedToken)) {
+        return false;
+      }
+      
+      // Check if there are other tabs with valid authentication
+      // This is a simple check - in a more complex app, you might use BroadcastChannel
+      return true;
+    },
+
     // Get current Firebase token (with automatic refresh)
     async getCurrentToken(): Promise<string | null> {
+      // First, try to get token from localStorage for immediate access
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken && !this.isTokenExpired(storedToken)) {
+        console.log('Using stored token from localStorage');
+        return storedToken;
+      }
+
+      // If no stored token or expired, try to get from Firebase user
       if (!this.firebaseUser) {
         console.log('No Firebase user available for token');
         return null;
@@ -254,9 +290,16 @@ export const useAuthStore = defineStore('auth', {
         // If token expires in less than 5 minutes, refresh it
         if (timeUntilExpiry < 5 * 60 * 1000) {
           console.log('Token expires soon, refreshing...');
-          return await this.firebaseUser.getIdToken(true);
+          const newToken = await this.firebaseUser.getIdToken(true);
+          // Store the new token in localStorage
+          if (newToken) {
+            localStorage.setItem('authToken', newToken);
+          }
+          return newToken;
         }
         
+        // Store the current token in localStorage
+        localStorage.setItem('authToken', tokenResult.token);
         return tokenResult.token;
       } catch (error) {
         console.error('Failed to get token:', error);
@@ -296,15 +339,35 @@ export const useAuthStore = defineStore('auth', {
             this.isAuthenticated = true;
             this.error = null;
             
+            // Store token in localStorage for persistence across tabs
+            try {
+              const token = await firebaseUser.getIdToken();
+              localStorage.setItem('authToken', token);
+              console.log('✅ Token stored in localStorage');
+            } catch (error) {
+              console.error('Failed to store token in localStorage:', error);
+            }
+            
             // Set up automatic token refresh
             this.setupTokenRefresh();
           } else {
-            console.log('👤 No user, clearing state');
-            // No user, clear state
+            // Check if user should remain authenticated (for multi-tab scenarios)
+            if (this.shouldRemainAuthenticated()) {
+              console.log('🔐 Valid token found in localStorage, maintaining auth state');
+              // Don't clear the state - user is still authenticated in other tabs
+              return;
+            }
+            
+            console.log('👤 No user and no valid token, clearing state');
+            // No user and no valid token, clear state
             this.user = null;
             this.firebaseUser = null;
             this.isAuthenticated = false;
             this.error = null;
+            
+            // Clear token from localStorage
+            localStorage.removeItem('authToken');
+            console.log('✅ Token removed from localStorage');
           }
         });
       }

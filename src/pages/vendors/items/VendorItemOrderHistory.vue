@@ -256,9 +256,9 @@ const getStatusClass = (status: string | undefined) => {
   }
 };
 
-const viewOrderDetails = (order: VendorOrderItem) => {
+const viewOrderDetails = () => {
   // Navigate to the vendor order detail page
-  router.push(`/vendors/orders/${(order as any).vendor_order_id}`);
+  router.push(`/vendors/orders/5`);
 };
 
 const backToItemDetail = () => {

@@ -1,9 +1,11 @@
 <template>
   <div class="dashboard">
     <!-- Header -->
-    <div class="dashboard-header">
-      <h1>Dashboard</h1>
-      <p class="subtitle">Overview of your purchasing and inventory operations</p>
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Dashboard</h1>
+        <p>Overview of your purchasing and inventory operations</p>
+      </div>
     </div>
 
     <!-- Key Metrics Cards -->
@@ -137,20 +139,25 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.dashboard-header {
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ecf0f1;
 }
 
-.dashboard-header h1 {
-  font-size: 2.5rem;
+.header-content h1 {
   margin: 0 0 0.5rem 0;
   color: #2c3e50;
+  font-size: 2rem;
 }
 
-.subtitle {
-  color: #7f8c8d;
-  font-size: 1.1rem;
+.header-content p {
   margin: 0;
+  color: #7f8c8d;
+  font-size: 1rem;
 }
 
 .metrics-grid {

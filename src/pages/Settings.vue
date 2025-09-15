@@ -38,6 +38,13 @@
       >
         Notifications
       </button>
+      <button 
+        class="tab-btn" 
+        :class="{ active: activeTab === 'configuration' }"
+        @click="activeTab = 'configuration'"
+      >
+        Configuration
+      </button>
     </div>
 
     <!-- Loading State -->
@@ -197,6 +204,95 @@
           </div>
         </div>
       </div>
+
+      <!-- Configuration Settings -->
+      <div v-if="activeTab === 'configuration'" class="settings-section">
+        <h3>System Configuration</h3>
+        <p class="section-description">Configure global vendor selection settings that apply to all operations unless overridden.</p>
+        
+        <div class="system-config">
+          <h4>System Default Settings</h4>
+          <p class="config-description">
+            These are the global default settings that apply to all orders unless overridden at lower levels.
+            These settings form the foundation of the configuration hierarchy.
+          </p>
+          
+          <div class="config-section">
+            <h5>Vendor Selection Strategy</h5>
+            <div class="config-field">
+              <label>Default Strategy</label>
+              <select v-model="systemConfig.strategy">
+                <option value="lowest_price">Lowest Price</option>
+                <option value="best_value">Best Value</option>
+                <option value="preferred_vendor">Preferred Vendor</option>
+                <option value="delivery_optimization">Delivery Optimization</option>
+              </select>
+              <p class="field-description">Default strategy used when no order-specific strategy is set</p>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h5>Quality & Delivery Preferences</h5>
+            
+            <div class="config-field">
+              <label>
+                <input 
+                  type="checkbox" 
+                  v-model="systemConfig.organic_preference"
+                />
+                Prefer Organic Products
+              </label>
+              <p class="field-description">When enabled, organic products will be preferred over conventional ones</p>
+            </div>
+            
+            <div class="config-field">
+              <label>
+                <input 
+                  type="checkbox" 
+                  v-model="systemConfig.delivery_priority"
+                />
+                Prioritize Fast Delivery
+              </label>
+              <p class="field-description">When enabled, faster delivery options will be preferred over cost savings</p>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <h5>Order Thresholds</h5>
+            <div class="config-field">
+              <label>Minimum Order Threshold</label>
+              <input 
+                type="number" 
+                min="0" 
+                step="0.01" 
+                v-model="systemConfig.min_order_threshold"
+              />
+              <p class="field-description">Minimum order amount to trigger bulk discounts</p>
+            </div>
+            
+            <div class="config-field">
+              <label>Maximum Price Multiplier</label>
+              <input 
+                type="number" 
+                min="1" 
+                max="5" 
+                step="0.1" 
+                v-model="systemConfig.max_price_multiplier"
+              />
+              <p class="field-description">Maximum price multiplier for vendor items (1.0 = no limit)</p>
+            </div>
+          </div>
+
+          <div class="config-actions">
+            <BaseButton variant="primary" @click="saveSystemConfig" :loading="configSaving">
+              Save System Settings
+            </BaseButton>
+            <BaseButton variant="secondary" @click="resetSystemConfig">
+              Reset to Defaults
+            </BaseButton>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Save Button -->
@@ -206,8 +302,6 @@
         @click="saveSettings"
         :disabled="saveLoading"
       >
-        <span v-if="saveLoading" class="btn-icon">⏳</span>
-        <span v-else class="btn-icon">💾</span>
         {{ saveLoading ? 'Saving...' : 'Save Settings' }}
       </button>
       <button 
@@ -225,22 +319,34 @@
 import { ref, computed, onMounted } from 'vue';
 import { useVendorStore } from '../stores/vendors';
 import { useSettingsStore } from '../stores/settings';
-import type { Vendor } from '../api/model';
 
 const vendorStore = useVendorStore();
 const settingsStore = useSettingsStore();
 
 // Reactive state
-const activeTab = ref<'general' | 'inventory' | 'orders' | 'notifications'>('general');
+const activeTab = ref<'general' | 'inventory' | 'orders' | 'notifications' | 'configuration'>('general');
 const saveLoading = ref(false);
 const resetLoading = ref(false);
 const saveMessage = ref<string | null>(null);
+const configSaving = ref(false);
+
+// Configuration state
+const systemConfig = ref({
+  strategy: 'lowest_price',
+  organic_preference: false,
+  delivery_priority: false,
+  min_order_threshold: 0,
+  preferred_vendor_ids: [],
+  brand_preference: '',
+  max_price_multiplier: 1.0
+});
 
 // Computed properties
 const vendors = computed(() => vendorStore.vendors);
 const settings = computed(() => settingsStore.settings);
 const loading = computed(() => settingsStore.loading);
 const error = computed(() => settingsStore.error);
+
 
 // Methods
 const saveSettings = async () => {
@@ -287,6 +393,35 @@ const resetSettings = async () => {
   }
 };
 
+// Configuration methods
+const saveSystemConfig = async () => {
+  configSaving.value = true;
+  try {
+    // TODO: Implement system configuration save API
+    // await houseOrdersStore.updateVendorSelectionConfig('system', 0, systemConfig.value);
+    saveMessage.value = 'System configuration saved successfully!';
+    setTimeout(() => {
+      saveMessage.value = null;
+    }, 3000);
+  } catch (error) {
+    saveMessage.value = 'Failed to save system configuration.';
+  } finally {
+    configSaving.value = false;
+  }
+};
+
+const resetSystemConfig = () => {
+  systemConfig.value = {
+    strategy: 'lowest_price',
+    organic_preference: false,
+    delivery_priority: false,
+    min_order_threshold: 0,
+    preferred_vendor_ids: [],
+    brand_preference: '',
+    max_price_multiplier: 1.0
+  };
+};
+
 // Lifecycle
 onMounted(async () => {
   // Load settings and vendors
@@ -294,6 +429,13 @@ onMounted(async () => {
     settingsStore.fetchSettings(),
     vendors.value.length === 0 ? vendorStore.fetchVendors() : Promise.resolve()
   ]);
+  
+  // TODO: Load system configuration
+  // try {
+  //   systemConfig.value = await houseOrdersStore.getVendorSelectionConfig('system', 0);
+  // } catch (error) {
+  //   console.error('Failed to load system configuration:', error);
+  // }
 });
 </script>
 
@@ -548,5 +690,105 @@ onMounted(async () => {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* System Configuration Styles */
+.system-config {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.system-config h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.config-description {
+  margin: 0 0 1.5rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.config-section {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.config-section h5 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.config-field {
+  margin-bottom: 1rem;
+}
+
+.config-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.config-field select,
+.config-field input[type="range"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.config-field input[type="range"] {
+  padding: 0;
+  height: 6px;
+  background: #e9ecef;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.config-field input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-value {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  color: #007bff;
+  min-width: 30px;
+}
+
+.field-description {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.config-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 </style>

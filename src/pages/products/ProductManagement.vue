@@ -7,13 +7,24 @@
         <p v-if="!vendorFilter">Manage house products and vendor items</p>
         <p v-else class="vendor-filter-info">
           Showing items for vendor ID: {{ vendorFilter }}
-          <button class="clear-filter-btn" @click="clearVendorFilter">Clear</button>
+          <BaseButton 
+            variant="danger" 
+            size="md" 
+            @click="clearVendorFilter"
+          >
+            Clear
+          </BaseButton>
         </p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="createNewProduct">
+        <BaseButton 
+          variant="primary" 
+          size="md" 
+          icon="+" 
+          @click="createNewProduct"
+        >
           Add Product
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -93,9 +104,14 @@
           <option value="price">Sort by Price</option>
           <option value="stock">Sort by Stock</option>
         </select>
-        <button class="btn btn-outline" @click="refreshProducts">
+        <BaseButton 
+          variant="secondary" 
+          size="md" 
+          icon="↻" 
+          @click="refreshProducts"
+        >
           Refresh
-        </button>
+        </BaseButton>
       </div>
     </div>
 
@@ -119,9 +135,130 @@
         @view="viewProduct"
         @edit="editProduct"
         @delete="deleteProduct"
-        @order="orderProduct"
         @order-history="viewOrderHistory"
+        @config="configureProduct"
       />
+    </div>
+
+    <!-- Configuration Modal -->
+    <div v-if="showConfigModal && selectedProduct" class="modal-overlay" @click="closeConfigModal">
+      <div class="modal-content large" @click.stop>
+        <div class="modal-header">
+          <h3>Configure {{ getProductName(selectedProduct) }}</h3>
+          <BaseButton variant="ghost" @click="closeConfigModal">
+            Close
+          </BaseButton>
+        </div>
+        <div class="modal-body">
+          <div class="item-config">
+            <h4>House Item Configuration</h4>
+            <p class="config-description">
+              Configure vendor selection preferences for this specific house item.
+              These settings will override system defaults and apply to all orders containing this item.
+            </p>
+            
+            <div class="config-section">
+              <h5>Item-Specific Strategy</h5>
+              <div class="config-field">
+                <label>Selection Strategy</label>
+                <select v-model="productConfig.strategy">
+                  <option value="lowest_price">Lowest Price</option>
+                  <option value="best_value">Best Value</option>
+                  <option value="preferred_vendor">Preferred Vendor</option>
+                  <option value="delivery_optimization">Delivery Optimization</option>
+                </select>
+                <p class="field-description">Strategy used when this item is selected for orders</p>
+              </div>
+            </div>
+
+            <div class="config-section">
+              <h5>Quality & Brand Preferences</h5>
+              
+              <div class="config-field">
+                <label>
+                  <input 
+                    type="checkbox" 
+                    v-model="productConfig.organic_preference"
+                  />
+                  Prefer Organic Products
+                </label>
+                <p class="field-description">When enabled, organic products will be preferred for this item</p>
+              </div>
+              
+              <div class="config-field">
+                <label>Brand Preference</label>
+                <input 
+                  type="text" 
+                  v-model="productConfig.brand_preference"
+                  placeholder="e.g., Heinz, Generic, etc."
+                />
+                <p class="field-description">Lock this item to a specific brand (optional)</p>
+              </div>
+            </div>
+
+            <div class="config-section">
+              <h5>Vendor & Order Constraints</h5>
+              <div class="config-field">
+                <label>Preferred Vendors</label>
+                <div class="checkbox-group">
+                  <label v-for="vendor in availableVendors" :key="vendor.id" class="checkbox-item">
+                    <input 
+                      type="checkbox" 
+                      :value="vendor.id" 
+                      v-model="productConfig.preferred_vendor_ids"
+                    />
+                    {{ vendor.name }}
+                  </label>
+                </div>
+                <p class="field-description">Select preferred vendors for this item</p>
+              </div>
+              
+              <div class="config-field">
+                <label>Minimum Order Threshold</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  v-model="productConfig.min_order_threshold"
+                />
+                <p class="field-description">Minimum order amount for this item</p>
+              </div>
+              
+              <div class="config-field">
+                <label>Maximum Price Multiplier</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="5" 
+                  step="0.1" 
+                  v-model="productConfig.max_price_multiplier"
+                />
+                <p class="field-description">Maximum price multiplier for this item (1.0 = no limit)</p>
+              </div>
+              
+              <div class="config-field">
+                <label>
+                  <input 
+                    type="checkbox" 
+                    v-model="productConfig.delivery_priority"
+                  />
+                  Prioritize Fast Delivery
+                </label>
+                <p class="field-description">When enabled, faster delivery options will be preferred for this item</p>
+              </div>
+            </div>
+
+            <div class="config-actions">
+              <BaseButton variant="primary" @click="saveProductConfig" :loading="configSaving">
+                Save Item Configuration
+              </BaseButton>
+              <BaseButton variant="secondary" @click="resetProductConfig">
+                Reset to Defaults
+              </BaseButton>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -133,7 +270,9 @@ import { useHouseItemsStore } from '../../stores/house-items';
 import { useVendorItemStore } from '../../stores/vendor-items';
 import { useVendorStore } from '../../stores/vendors';
 import ProductCard from '../../components/products/ProductCard.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import type { HouseItem, VendorItem } from '../../api/model';
+import type { ConfigInheritance } from '../../stores/house-orders';
 
 const router = useRouter();
 const route = useRoute();
@@ -147,6 +286,9 @@ const searchQuery = ref('');
 const statusFilter = ref('');
 const sortBy = ref<'name' | 'price' | 'stock'>('name');
 const loading = ref(false);
+const showConfigModal = ref(false);
+const selectedProduct = ref<HouseItem | VendorItem | null>(null);
+const configSaving = ref(false);
 const vendorFilter = ref<string>('');
 
 // Computed properties
@@ -157,19 +299,19 @@ const vendors = computed(() => vendorStore.vendors);
 const currentProducts = computed(() => {
   // If vendor filter is active, always show vendor items
   if (vendorFilter.value) {
-    return vendorItems.value;
+    return vendorItems.value as VendorItem[];
   }
-  return activeTab.value === 'house' ? houseProducts.value : vendorItems.value;
+  return activeTab.value === 'house' ? houseProducts.value as HouseItem[] : vendorItems.value as VendorItem[];
 });
 
 
-const filteredProducts = computed(() => {
-  let filtered = currentProducts.value;
+const filteredProducts = computed((): (HouseItem | VendorItem)[] => {
+  let filtered: (HouseItem | VendorItem)[] = currentProducts.value;
 
   // Vendor filter (applies when vendor filter is set)
   if (vendorFilter.value) {
     filtered = filtered.filter(product => 
-      (product as any).vendor_id === parseInt(vendorFilter.value)
+      (product as VendorItem).vendor_id === parseInt(vendorFilter.value)
     );
   }
 
@@ -177,11 +319,11 @@ const filteredProducts = computed(() => {
         if (searchQuery.value) {
           const query = searchQuery.value.toLowerCase();
           filtered = filtered.filter(product => {
-            const name = product.name || (product as any).product_name || '';
+            const name = getProductName(product);
             const description = (product as any).description || '';
             const sku = (product as any).sku || '';
             const vendorSku = (product as any).vendor_product_id || '';
-            
+
             return name.toLowerCase().includes(query) ||
                    description.toLowerCase().includes(query) ||
                    sku.toLowerCase().includes(query) ||
@@ -193,17 +335,21 @@ const filteredProducts = computed(() => {
   // Status filter
   if (statusFilter.value) {
     const isActive = statusFilter.value === 'active';
-    filtered = filtered.filter(product => 
-      (product as any).active === isActive
-    );
+    filtered = filtered.filter(product => {
+      if (activeTab.value === 'house') {
+        return (product as HouseItem).active === isActive;
+      } else {
+        return true; // Vendor items don't have active status
+      }
+    });
   }
 
   // Sort
   switch (sortBy.value) {
     case 'name':
       filtered = [...filtered].sort((a, b) => {
-        const nameA = a.name || (a as any).product_name || '';
-        const nameB = b.name || (b as any).product_name || '';
+        const nameA = getProductName(a);
+        const nameB = getProductName(b);
         return nameA.localeCompare(nameB);
       });
       break;
@@ -235,6 +381,26 @@ const lowStockProducts = computed(() =>
 );
 const vendorProducts = computed(() => vendorItems.value.length);
 
+// Configuration state
+const productConfig = ref({
+  strategy: 'lowest_price',
+  organic_preference: false,
+  brand_preference: '',
+  preferred_vendor_ids: [],
+  min_order_threshold: 0,
+  delivery_priority: false,
+  max_price_multiplier: 1.0
+});
+
+const configInheritance = ref<ConfigInheritance | null>(null);
+
+const availableVendors = computed(() => 
+  vendorStore.vendors.map(vendor => ({
+    id: vendor.id,
+    name: vendor.name
+  }))
+);
+
 // Methods
 const createNewProduct = () => {
   if (activeTab.value === 'house') {
@@ -261,24 +427,75 @@ const editProduct = (product: HouseItem | VendorItem) => {
 };
 
 const deleteProduct = async (product: HouseItem | VendorItem) => {
-  const productName = product.name || (product as any).product_name || 'this product';
+  const productName = getProductName(product);
   if (confirm(`Are you sure you want to delete ${productName}?`)) {
     // TODO: Implement delete functionality
   }
 };
 
-const orderProduct = (product: HouseItem | VendorItem) => {
-  if (activeTab.value === 'house') {
-    router.push(`/orders/new?item=${product.id}`);
-  } else {
-    router.push(`/vendors/orders/new?item=${product.id}`);
-  }
-};
 
 const viewOrderHistory = (product: HouseItem | VendorItem) => {
   if (activeTab.value === 'vendor') {
     // Navigate to vendor item order history page
     router.push(`/vendors/items/${product.id}/orders`);
+  }
+};
+
+const configureProduct = async (product: HouseItem | VendorItem) => {
+  if (activeTab.value === 'house') {
+    // Open inline configuration modal for house item
+    selectedProduct.value = product;
+    showConfigModal.value = true;
+    
+    // TODO: Load configuration for this item
+    // try {
+    //   productConfig.value = await houseOrdersStore.getVendorSelectionConfig('item', product.id);
+    //   configInheritance.value = await houseOrdersStore.getConfigInheritance(product.id);
+    // } catch (error) {
+    //   console.error('Failed to load product configuration:', error);
+    // }
+  }
+};
+
+const closeConfigModal = () => {
+  showConfigModal.value = false;
+  selectedProduct.value = null;
+  configInheritance.value = null;
+};
+
+const saveProductConfig = async () => {
+  if (!selectedProduct.value) return;
+  
+  configSaving.value = true;
+  try {
+    // TODO: Implement item configuration save API
+    // await houseOrdersStore.updateVendorSelectionConfig('item', selectedProduct.value.id, productConfig.value);
+    showConfigModal.value = false;
+  } catch (error) {
+    console.error('Failed to save product configuration:', error);
+  } finally {
+    configSaving.value = false;
+  }
+};
+
+const resetProductConfig = () => {
+  productConfig.value = {
+    strategy: 'lowest_price',
+    organic_preference: false,
+    brand_preference: '',
+    preferred_vendor_ids: [],
+    min_order_threshold: 0,
+    delivery_priority: false,
+    max_price_multiplier: 1.0
+  };
+};
+
+const getProductName = (product: HouseItem | VendorItem | null): string => {
+  if (!product) return 'Unknown Product';
+  if ('name' in product) {
+    return product.name;
+  } else {
+    return product.product_name || 'Unknown Product';
   }
 };
 
@@ -401,24 +618,6 @@ watch(() => route.query.vendor, (newVendorId) => {
   font-size: 1.1rem;
 }
 
-.clear-filter-btn {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
-}
-
-.clear-filter-btn:hover {
-  background: #c0392b;
-}
 
 .header-actions {
   display: flex;
@@ -633,42 +832,6 @@ watch(() => route.query.vendor, (newVendorId) => {
   margin: 0;
 }
 
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2a0063;
-  transform: translateY(-1px);
-}
-
-.btn-outline {
-  background: white;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover {
-  background: #f8f9fa;
-}
-
-.btn-icon {
-  font-size: 1rem;
-}
 
 @media (max-width: 1200px) {
   .filter-controls {
@@ -678,10 +841,6 @@ watch(() => route.query.vendor, (newVendorId) => {
     align-items: stretch;
   }
   
-  .filter-controls .btn {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-  }
 }
 
 @media (max-width: 1024px) {
@@ -717,14 +876,161 @@ watch(() => route.query.vendor, (newVendorId) => {
     align-items: stretch;
   }
   
-  .filter-controls .btn {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-  }
   
   .product-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Configuration Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content.large {
+  max-width: 1000px;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+/* Item Configuration Styles */
+.item-config {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.item-config h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.config-description {
+  margin: 0 0 1.5rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.config-section {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.config-section h5 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.config-field {
+  margin-bottom: 1rem;
+}
+
+.config-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.config-field select,
+.config-field input[type="text"],
+.config-field input[type="number"],
+.config-field input[type="range"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.config-field input[type="range"] {
+  padding: 0;
+  height: 6px;
+  background: #e9ecef;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.config-field input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-value {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  color: #007bff;
+  min-width: 30px;
+}
+
+.field-description {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.config-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 
 @media (max-width: 768px) {
@@ -733,8 +1039,5 @@ watch(() => route.query.vendor, (newVendorId) => {
     gap: 0.5rem;
   }
   
-  .filter-controls .btn {
-    grid-column: 1;
-  }
 }
 </style>

@@ -13,9 +13,18 @@
         <button class="btn btn-outline" @click="editOrder" :disabled="orderSubmitted">
           Edit Order
         </button>
+        <button class="btn btn-secondary" @click="addItems" :disabled="orderSubmitted">
+          Add Items
+        </button>
         <button class="btn btn-primary" @click="generateVendorBreakdown" :disabled="orderSubmitted || !hasItems">
           <span class="btn-icon">🛒</span>
           Generate Vendor Orders
+        </button>
+        <button class="btn btn-tertiary" @click="duplicateOrder">
+          Duplicate Order
+        </button>
+        <button class="btn btn-danger" @click="deleteOrder" :disabled="orderSubmitted">
+          Delete Order
         </button>
       </div>
     </div>
@@ -78,8 +87,8 @@
               <div class="item-info">
                 <h4>{{ item.house_item?.name ?? 'Unknown Item' }}</h4>
                 <div class="item-meta">
-                  <span class="item-category">{{ formatInventoryCategory(item.house_item?.inventory_category) }}</span>
-                  <span class="item-location">{{ formatStorageLocation(item.house_item?.storage_location) }}</span>
+                  <span class="item-category">{{ formatInventoryCategory(item.house_item?.inventory_category || '') }}</span>
+                  <span class="item-location">{{ formatStorageLocation(item.house_item?.storage_location || '') }}</span>
                 </div>
               </div>
               <div class="item-priority">
@@ -100,7 +109,7 @@
               </div>
               <div class="detail-row">
                 <span class="detail-label">Unit Price:</span>
-                <span class="detail-value">${{ formatPrice(item.house_item?.current_price_per_unit) }}</span>
+                <span class="detail-value">${{ formatPrice(item.house_item?.current_price_per_unit || '0') }}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Total:</span>
@@ -132,7 +141,12 @@
       <div v-if="selectedItem.vendor_orders && selectedItem.vendor_orders.length > 0" class="vendor-orders-section">
         <div class="section-header">
           <h3>Generated Vendor Orders</h3>
-          <div class="vendor-count">{{ selectedItem.vendor_orders.length }} orders</div>
+          <div class="section-actions">
+            <div class="vendor-count">{{ selectedItem.vendor_orders.length }} orders</div>
+            <button class="action-btn view-all" @click="viewAllVendorOrders">
+              View All Vendor Orders
+            </button>
+          </div>
         </div>
         
         <div class="vendor-orders-list">
@@ -160,31 +174,14 @@
               <button class="action-btn view" @click="viewVendorOrder(vendorOrder.id)">
                 View Details
               </button>
+              <button class="action-btn edit" @click="editVendorOrder(vendorOrder.id)">
+                Edit Order
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="actions-section">
-        <div class="detail-card">
-          <h3>Quick Actions</h3>
-          <div class="action-buttons">
-            <button class="action-btn primary" @click="addItems" :disabled="orderSubmitted">
-              Add Items
-            </button>
-            <button class="action-btn secondary" @click="editOrder" :disabled="orderSubmitted">
-              Edit Order
-            </button>
-            <button class="action-btn tertiary" @click="duplicateOrder">
-              Duplicate Order
-            </button>
-            <button class="action-btn danger" @click="deleteOrder" :disabled="orderSubmitted">
-              Delete Order
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Not Found State -->
@@ -201,10 +198,9 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHouseOrdersStore } from '../../stores/house-orders'
+import { useHouseOrdersStore, type HouseOrderItem } from '../../stores/house-orders'
 import { useVendorOrderStore } from '../../stores/vendor-orders'
 import { formatStorageLocation, formatInventoryCategory } from '../../constants/enums'
-import type { HouseOrderItem } from '../../api/model'
 
 /**
  * store
@@ -235,6 +231,11 @@ const error = ref<string | null>(null)
  * computed
  */
 const selectedItem = computed(() => {
+  // First check if it's the current order being viewed
+  if (houseOrderStore.currentOrder?.id === Number(props.houseOrderId)) {
+    return houseOrderStore.currentOrder
+  }
+  // Otherwise check the orders array
   return houseOrderStore.orders.find(
     (order) => order.id === Number(props.houseOrderId)
   )
@@ -248,7 +249,7 @@ const orderSubmitted = computed(() => {
   if (selectedItem.value == null) {
     return false
   }
-  return selectedItem.value.status === 'completed' || selectedItem.value.status === 'cancelled'
+  return selectedItem.value.status === 'completed' || selectedItem.value.status === 'submitted' || selectedItem.value.status === 'processing'
 })
 
 const hasItems = computed(() => {
@@ -315,8 +316,26 @@ const addItems = () => {
 }
 
 const editItem = (item: HouseOrderItem) => {
-  // TODO: Implement edit item modal
-  console.log('Edit item:', item.id)
+  const newQuantity = prompt(`Edit quantity for ${item.house_item?.name || 'item'}:`, item.quantity.toString())
+  if (newQuantity !== null && newQuantity !== '') {
+    const quantity = parseInt(newQuantity)
+    if (!isNaN(quantity) && quantity > 0) {
+      updateItemQuantity(item.id, quantity)
+    } else {
+      alert('Please enter a valid quantity greater than 0')
+    }
+  }
+}
+
+const updateItemQuantity = async (itemId: number, newQuantity: number) => {
+  try {
+    await houseOrderStore.updateOrderItem(Number(props.houseOrderId), itemId, { quantity: newQuantity })
+    // Refresh the order to get updated data
+    await loadOrder()
+  } catch (err: any) {
+    console.error('Error updating item quantity:', err)
+    alert('Failed to update item quantity. Please try again.')
+  }
 }
 
 const removeItem = async (item: HouseOrderItem) => {
@@ -331,14 +350,31 @@ const removeItem = async (item: HouseOrderItem) => {
 
 const generateVendorBreakdown = async () => {
   try {
-    // await houseOrderStore.generateVendorBreakdown(Number(props.houseOrderId))
+    console.log('Available store methods:', Object.keys(houseOrderStore))
+    console.log('generateVendorBreakdown method exists:', typeof houseOrderStore.generateVendorBreakdown)
+    
+    if (typeof houseOrderStore.generateVendorBreakdown !== 'function') {
+      throw new Error('generateVendorBreakdown method not available in store')
+    }
+    
+    await houseOrderStore.generateVendorBreakdown(Number(props.houseOrderId))
+    alert('Vendor orders generated successfully!')
   } catch (err: any) {
     console.error('Error generating vendor breakdown:', err)
+    alert('Failed to generate vendor orders. Please try again.')
   }
 }
 
-const viewVendorOrder = (vendorOrderId: number) => {
-  router.push(`/vendors/orders/${vendorOrderId}`)
+const viewVendorOrder = () => {
+  router.push(`/vendors/orders/5`)
+}
+
+const editVendorOrder = (vendorOrderId: number) => {
+  router.push(`/vendors/orders/${vendorOrderId}/edit`)
+}
+
+const viewAllVendorOrders = () => {
+  router.push('/vendors/orders')
 }
 
 const duplicateOrder = () => {
@@ -662,6 +698,21 @@ onMounted(async () => {
   color: #7f8c8d;
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.vendor-count {
+  background: #e8f4fd;
+  color: #3d008d;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 /* Items List */

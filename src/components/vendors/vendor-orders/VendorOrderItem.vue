@@ -15,7 +15,7 @@
     <div class="order-details">
       <div class="detail-row">
         <span class="detail-label">Total Amount:</span>
-        <span class="detail-value total">${{ calculatedTotal.toFixed(2) }}</span>
+        <span class="detail-value total">${{ (calculatedTotal || 0).toFixed(2) }}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Items:</span>
@@ -61,13 +61,14 @@ const emit = defineEmits<{
 const calculatedTotal = computed(() => {
   // If no items, use the total_amount from the order
   if (!props.order.items || props.order.items.length === 0) {
-    return props.order.total_amount || 0;
+    const totalAmount = parseFloat(String(props.order.total_amount || '0'));
+    return isNaN(totalAmount) ? 0 : totalAmount;
   }
   
   // Calculate total from items
   const calculated = props.order.items.reduce((total, item) => {
     // Handle different possible field names from API
-    const price = parseFloat((item as any).price || (item as any).unit_price || '0');
+    const price = parseFloat((item as any).price || (item as any).unit_price || (item as any).total_price || '0');
     const quantity = parseFloat((item as any).quantity || '0');
     
     // Return total if price or quantity is invalid

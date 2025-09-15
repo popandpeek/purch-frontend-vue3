@@ -53,7 +53,7 @@
       <div v-if="type === 'house'" class="product-storage">
         <div class="storage-info">
           <span class="storage-label">Storage:</span>
-          <span class="storage-value">{{ product.storage_location || 'Not specified' }}</span>
+          <span class="storage-value">{{ (product as HouseItem).storage_location || 'Not specified' }}</span>
         </div>
         <div v-if="isLowStock" class="low-stock-warning">
           <span class="warning-text">Low Stock</span>
@@ -83,11 +83,11 @@
         </button>
         <button 
           v-if="type === 'house'" 
-          class="action-btn order" 
-          @click="handleOrder" 
-          :disabled="!canOrder"
+          class="action-btn config" 
+          @click="handleConfig"
+          title="Configure vendor selection"
         >
-          Order
+          Configure
         </button>
         <button 
           v-if="type === 'vendor'" 
@@ -116,8 +116,8 @@ const emit = defineEmits<{
   view: [product: HouseItem | VendorItem];
   edit: [product: HouseItem | VendorItem];
   delete: [product: HouseItem | VendorItem];
-  order: [product: HouseItem | VendorItem];
   'order-history': [product: HouseItem | VendorItem];
+  config: [product: HouseItem | VendorItem];
 }>();
 
 // Methods
@@ -210,9 +210,6 @@ const stockClass = computed(() => {
   return 'low-stock';
 });
 
-const canOrder = computed(() => {
-  return isActive.value;
-});
 
 // Methods
 const handleView = () => {
@@ -223,9 +220,10 @@ const handleEdit = () => {
   emit('edit', props.product);
 };
 
-const handleOrder = () => {
-  emit('order', props.product);
+const handleConfig = () => {
+  emit('config', props.product);
 };
+
 
 const handleOrderHistory = () => {
   emit('order-history', props.product);
@@ -488,14 +486,15 @@ const handleOrderHistory = () => {
   color: #f39c12;
 }
 
-.action-btn.order:hover:not(:disabled) {
-  background: #d4edda;
-  border-color: #27ae60;
-  color: #27ae60;
-}
 
 .action-btn.order-history:hover:not(:disabled) {
   background: #e8f4fd;
+  border-color: #3d008d;
+  color: #3d008d;
+}
+
+.action-btn.config:hover:not(:disabled) {
+  background: #f0f8ff;
   border-color: #3d008d;
   color: #3d008d;
 }

@@ -7,13 +7,24 @@
         <p v-if="!vendorFilter">Manage house orders and vendor orders</p>
         <p v-else class="vendor-filter-info">
           Showing orders for vendor ID: {{ vendorFilter }}
-          <button class="clear-filter-btn" @click="clearVendorFilter">Clear</button>
+          <BaseButton 
+            variant="danger" 
+            size="md" 
+            @click="clearVendorFilter"
+          >
+            Clear
+          </BaseButton>
         </p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" @click="createNewOrder">
-          Order
-        </button>
+        <BaseButton 
+          variant="primary" 
+          size="md" 
+          icon="+" 
+          @click="createNewOrder"
+        >
+          New Order
+        </BaseButton>
       </div>
     </div>
 
@@ -52,9 +63,14 @@
                 class="search-input"
               >
             </div>
-            <button class="btn btn-outline" @click="refreshOrders">
+            <BaseButton 
+              variant="secondary" 
+              size="md" 
+              icon="↻" 
+              @click="refreshOrders"
+            >
               Refresh
-            </button>
+            </BaseButton>
           </div>
         </div>
 
@@ -97,17 +113,9 @@
           <div v-else>
             <div class="details-header">
               <h3>Order Details</h3>
-              <div class="details-actions">
-                <button class="btn btn-outline" @click="editOrder">
-                  Edit
-                </button>
-                <button class="btn btn-danger" @click="deleteOrder">
-                  Delete
-                </button>
-              </div>
             </div>
 
-            <OrderDetailsWithVendorSelection :order="selectedOrder" />
+            <OrderDetails :order="selectedOrder" />
           </div>
         </div>
       </div>
@@ -121,7 +129,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { useHouseOrdersStore } from '../../stores/house-orders';
 import { useVendorOrderStore } from '../../stores/vendor-orders';
 import OrderCard from '../../components/orders/OrderCard.vue';
-import OrderDetailsWithVendorSelection from '../../components/orders/OrderDetailsWithVendorSelection.vue';
+import OrderDetails from '../../components/orders/OrderDetails.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import type { HouseOrder } from '../../stores/house-orders';
 
 const router = useRouter();
@@ -194,25 +203,6 @@ const clearVendorFilter = () => {
   router.push('/orders');
 };
 
-const editOrder = () => {
-  if (!selectedOrder.value) return;
-  
-  if (activeTab.value === 'house') {
-    router.push(`/orders/${selectedOrder.value.id}/edit`);
-  } else {
-    router.push(`/vendors/orders/${selectedOrder.value.id}/edit`);
-  }
-};
-
-const deleteOrder = async () => {
-  if (!selectedOrder.value) return;
-  
-  if (confirm('Are you sure you want to delete this order?')) {
-    // TODO: Implement delete functionality
-    console.log('Delete order:', selectedOrder.value.id);
-    selectedOrder.value = null;
-  }
-};
 
 const refreshOrders = async () => {
   loading.value = true;
@@ -295,24 +285,6 @@ onMounted(async () => {
 }
 
 
-.clear-filter-btn {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
-}
-
-.clear-filter-btn:hover {
-  background: #c0392b;
-}
 
 .header-actions {
   display: flex;
@@ -477,51 +449,7 @@ onMounted(async () => {
   font-size: 1.25rem;
 }
 
-.details-actions {
-  display: flex;
-  gap: 0.5rem;
-}
 
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: #3d008d;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #2a0063;
-}
-
-.btn-outline {
-  background: white;
-  color: #3d008d;
-  border: 1px solid #3d008d;
-}
-
-.btn-outline:hover {
-  background: #f8f9fa;
-}
-
-.btn-danger {
-  background: #e74c3c;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #c0392b;
-}
 
 
 .loading-state,

@@ -10,6 +10,12 @@ import { Quasar } from 'quasar'
 import quasarUserOptions from './quasar-user-options'
 import { useAuthStore } from '@/stores/auth';
 
+// Import design system styles
+// import '@/shared/design-system/styles/index.scss';
+
+// Initialize dependency injection
+import { initializeServices } from '@/shared/container/registerServices';
+
 const app = createApp(App).use(Quasar, quasarUserOptions);
 const pinia = createPinia();
 app.use(pinia);
@@ -19,6 +25,11 @@ app.component('BaseCard', BaseCard);
 app.component('BaseButton', BaseButton);
 app.component('BaseBadge', BaseBadge);
 app.component('BaseInputListItem', BaseInputListItem);
+
+// Initialize services
+initializeServices({
+  apiBaseUrl: (import.meta as any).env?.VUE_APP_API_URL || 'http://localhost:8000/api/v1'
+});
 
 app.mount("#app");
 
